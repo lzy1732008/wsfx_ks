@@ -3,8 +3,9 @@ from wsfx2.code.util.file_fun import getlines
 from wsfx2.code.util.str_op import getStrSegment
 from wsfx2.code.pre_op.word2vec import vector,load_models
 
-import os,random
+import os,random,shutil
 import jieba.posseg as pos
+
 '''
 将数据集里面的数据对读取到txt，建立[训练集+验证集] 存储格式为:文书名|事实|法条|label\n,并且删除掉一半的负例
 输入:exceldict:数据集目录,以及该txt文件存储位置
@@ -62,9 +63,9 @@ def fun1(exceldict,target):
 '''
 训练数据
 '''
-# exceldict = '/Users/wenny/PycharmProjects/wsanalyse/wsfx/data/事实法条数据/训练集'
-# target = '../../source/dataset/train-原始训练集.txt'
-# fun(exceldict,target)
+# exceldict = '../../source/valset'
+# target = '../../source/dataset/set-3/val-原始训练集.txt'
+# fun1(exceldict,target)
 
 '''
 测试数据
@@ -109,8 +110,8 @@ def fun2(ft_zs_f,data_f,newdata_f):
 训练数据
 '''
 # ftzs_path = '../../source/法条/ft_nr_先验知识.txt'
-# data_path = '../../source/dataset/train-原始训练集.txt'
-# newdata_path = '../../source/dataset/train-添加先验知识.txt'
+# data_path = '../../source/dataset/set-3/val-原始训练集.txt'
+# newdata_path = '../../source/dataset/set-3/val-添加先验知识.txt'
 # f1 = open(ftzs_path,'r',encoding='utf-8')
 # f2 = open(data_path,'r',encoding='utf-8')
 # f3 = open(newdata_path,'w',encoding='utf-8')
@@ -173,8 +174,8 @@ def fun3(data_f,target_f):
 '''
 训练数据
 '''
-# data_f= open('../../source/dataset/train-添加先验知识.txt','r',encoding='utf-8')
-# tartget_f = open('../../source/dataset/train-分词.txt','w',encoding='utf-8')
+# data_f= open('../../source/dataset/set-3/val-添加先验知识.txt','r',encoding='utf-8')
+# tartget_f = open('../../source/dataset/set-3/val-分词.txt','w',encoding='utf-8')
 # fun3(data_f,tartget_f)
 
 '''
@@ -225,8 +226,8 @@ def zsVector(zwls, word_m,flag=1):
 '''
 训练数据
 '''
-# data_f= open('../../source/dataset/set_1/train-分词.txt','r',encoding='utf-8')
-# tartget_f = open('../../source/dataset/set_2/train-向量化.txt','w',encoding='utf-8')
+# data_f= open('../../source/dataset/set-3/val-分词.txt','r',encoding='utf-8')
+# tartget_f = open('../../source/dataset/set-3/val.txt','w',encoding='utf-8')
 # model_ss = load_models('../../source/wordvector/ssmodel_size128.model')
 # model_ft = load_models('../../source/wordvector/ssmodel_size128.model')
 # fun4(data_f,tartget_f,model_ss,model_ft)
@@ -262,18 +263,51 @@ def fun4(data_f,wsls,targetpath):
             val_str += line + '\n'
         else:
             train_str += line + '\n'
-    f_v = open(os.path.join(targetpath,'val.txt'),'w',encoding='utf-8')
-    f_t = open(os.path.join(targetpath,'train.txt'),'w',encoding='utf-8')
+    f_v = open(os.path.join(targetpath,'val-分词.txt'),'w',encoding='utf-8')
+    f_t = open(os.path.join(targetpath,'train-分词.txt'),'w',encoding='utf-8')
     f_v.write(val_str)
     f_v.close()
     f_t.write(train_str)
     f_t.close()
+#
 
-
-# exceldict = '/Users/wenny/PycharmProjects/wsanalyse/wsfx/data/事实法条数据/训练集'
+# exceldict = '/home/gjd/PycharmProjects/wsfx_ks/wsfx2/source/训练集'
 # wsls = os.listdir(exceldict)
-# data_f = open('../../source/dataset/set_2/train-向量化.txt','r',encoding='utf-8')
-# fun4(data_f,wsls,'../../source/dataset/set_2')
+# data_f = open('../../source/dataset/set_1/train-分词.txt','r',encoding='utf-8')
+# fun4(data_f,wsls,'../../source/dataset/set_1')
+
+
+# ========================================================================================================================
+def fun5(data_f,sourcepath,targetpath):
+    lines = data_f.read().split('\n')
+    files = []
+    for line in lines:
+        name = line.split('|')[0].strip()
+        if name in files:
+            continue
+        else:
+            files.append(name)
+    print(len(files))
+    for file in files:
+        spath = os.path.join(sourcepath,file)
+        tpath = os.path.join(targetpath,file)
+        try:
+           shutil.move(spath,tpath)
+        except:
+            print(file)
+
+# f = open('../../source/dataset/set_1/val-分词.txt','r',encoding='utf-8')
+# sourcepath = '../../source/训练集'
+# targetpath = '../../source/valset'
+# dir = os.listdir(sourcepath)
+# print(len(dir))
+# fun5(f,sourcepath,targetpath)
+
+
+
+
+
+
 
 
 

@@ -1,4 +1,4 @@
-#基于CNN，只使用最精细的那个先验知识
+#基于CNN，只使用最精细的那个先验知识，conv2d
 
 import tensorflow as tf
 

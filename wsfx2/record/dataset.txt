@@ -1,0 +1,3 @@
+set1:different word2vec + train and val same distribution
+set2:same word2vec + train and val same distribution
+set3:same word2vec + train and val different distribution

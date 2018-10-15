@@ -11,19 +11,19 @@ import tensorflow as tf
 from sklearn import metrics
 import tensorflow.contrib.keras as kr
 
-from wsfx2.code.models.model_2 import modelConfig, CNN
-from wsfx2.code.train.loader import batch_iter,data_load
+from wsfx2.code.models.cnn_model import TCNNConfig, TextCNN
+from wsfx2.code.train.loader import batch_iter2,data_load2
 
-data_dir = '../../source/dataset/set-3'
+data_dir = '../../source/dataset/set_1'
 trainpath = data_dir+'/train.txt'
 validatepath = data_dir+'/val.txt'
-testpath = data_dir +'/test.txt'
+testpath = data_dir +'/test-向量化.txt'
 t_f = open(trainpath,'r',encoding='utf-8')
 v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 1
 
-save_dir  = '../../result/set3/model2'  #修改处
+save_dir  = '../../result/set1/cnn_model'  #修改处
 save_path = save_dir+'/checkpoints/30-50/best_validation'  # 最佳验证结果保存路径
 tensorboard_dir = save_dir+'/tensorboard/30-50/'  #修改处
 if not os.path.exists(save_path):
@@ -32,8 +32,8 @@ if not os.path.exists(tensorboard_dir):
     os.makedirs(tensorboard_dir)
 
 
-config = modelConfig()
-model = CNN(config)
+config = TCNNConfig()
+model = TextCNN(config)
 
 
 
@@ -45,26 +45,25 @@ def get_time_dif(start_time):
     return timedelta(seconds=int(round(time_dif)))
 
 
-def feed_data(x1_batch,x2_batch,ks_batch,y_batch, keep_prob):
+def feed_data(x1_batch,x2_batch,y_batch, keep_prob):
     feed_dict = {
-        model.input_x1: x1_batch,
-        model.input_x2: x2_batch,
-        model.input_ks: ks_batch,
+        model.input_x_1: x1_batch,
+        model.input_x_2: x2_batch,
         model.input_y: y_batch,
         model.keep_prob: keep_prob
     }
     return feed_dict
 
 
-def evaluate(sess, x1_,x2_,ks_,y_):
+def evaluate(sess, x1_,x2_,y_):
     """评估在某一数据上的准确率和损失"""
     data_len = len(x1_)
-    batch_eval = batch_iter(x1_, x2_,ks_,y_, 128)
+    batch_eval = batch_iter2(x1_, x2_,y_, 128)
     total_loss = 0.0
     total_acc = 0.0
-    for x1_batch,x2_batch, ks_batch, y_batch in batch_eval:
+    for x1_batch,x2_batch, y_batch in batch_eval:
         batch_len = len(x1_batch)
-        feed_dict = feed_data(x1_batch,x2_batch,ks_batch, y_batch, 1.0)
+        feed_dict = feed_data(x1_batch,x2_batch, y_batch, 1.0)
         loss, acc = sess.run([model.loss, model.acc], feed_dict=feed_dict)
         total_loss += loss * batch_len
         total_acc += acc * batch_len
@@ -93,12 +92,12 @@ def train():
     print("Loading training and validation data...")
     # 载入训练集与验证集
     start_time = time.time()
-    train_1,train_2,train_ks, train_output = data_load(t_f,config, ks_flag)
+    train_1,train_2, train_output = data_load2(t_f,config)
     print('train len:',len(train_1))
 
 
     # print(train_3)
-    val_1, val_2,val_ks, val_output = data_load(v_f,config, ks_flag)
+    val_1, val_2, val_output = data_load2(v_f,config)
     print('validation len:', len(val_1))
 
     time_dif = get_time_dif(start_time)
@@ -119,10 +118,10 @@ def train():
     flag = False
     for epoch in range(config.num_epochs):
         print('Epoch:', epoch + 1)
-        batch_train = batch_iter(train_1, train_2, train_ks, train_output, config.batch_size)
-        for x1_batch,x2_batch,ks_batch, y_batch in batch_train:
+        batch_train = batch_iter2(train_1, train_2,train_output, config.batch_size)
+        for x1_batch,x2_batch, y_batch in batch_train:
 
-            feed_dict = feed_data(x1_batch,x2_batch,ks_batch, y_batch, config.dropout_keep_prob)
+            feed_dict = feed_data(x1_batch,x2_batch, y_batch, config.dropout_keep_prob)
 
             if total_batch % config.save_per_batch == 0:
                 # 每多少轮次将训练结果写入tensorboard scalar
@@ -133,7 +132,7 @@ def train():
                 # 每多少轮次输出在训练集和验证集上的性能
                 feed_dict[model.keep_prob] = 1.0
                 loss_train, acc_train = session.run([model.loss, model.acc], feed_dict=feed_dict)
-                loss_val, acc_val = evaluate(session, val_1,val_2,val_ks, val_output)  # 验证当前会话中的模型的loss和acc
+                loss_val, acc_val = evaluate(session, val_1,val_2, val_output)  # 验证当前会话中的模型的loss和acc
 
 
                 if acc_val > best_acc_val:
@@ -164,7 +163,7 @@ def train():
 def test():
     print("Loading test data...")
     start_time = time.time()
-    x1_test, x2_test,ks_test, y_test = data_load(test_f, config, flag=1)
+    x1_test, x2_test, y_test = data_load2(test_f, config)
 
     session = tf.Session()
     session.run(tf.global_variables_initializer())
@@ -172,7 +171,7 @@ def test():
     saver.restore(sess=session, save_path=save_path)  # 读取保存的模型
 
     print('Testing...')
-    loss_test, acc_test = evaluate(session, x1_test,x2_test, ks_test, y_test)
+    loss_test, acc_test = evaluate(session, x1_test,x2_test,  y_test)
     msg = 'Test Loss: {0:>6.2}, Test Acc: {1:>7.2%}'
     print(msg.format(loss_test, acc_test))
 
@@ -186,9 +185,8 @@ def test():
         start_id = i * batch_size
         end_id = min((i + 1) * batch_size, data_len)
         feed_dict = {
-            model.input_x1: x1_test[start_id:end_id],
-            model.input_x2: x2_test[start_id:end_id],
-            model.input_ks: ks_test[start_id:end_id],
+            model.input_x_1: x1_test[start_id:end_id],
+            model.input_x_2: x2_test[start_id:end_id],
             model.keep_prob: 1.0   #这个表示测试时不使用dropout对神经元过滤
         }
         y_pred_cls[start_id:end_id] = session.run(model.y_pred_cls, feed_dict=feed_dict)   #将所有批次的预测结果都存放在y_pred_cls中

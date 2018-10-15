@@ -1,6 +1,6 @@
-from code.util.ws_fun import getFTList
-from code.util.file_fun import write_dict
-from code.util.sql_fun import get_LawQW,connectSQL
+from wsfx2.code.util.ws_fun import getFTList
+from wsfx2.code.util.file_fun import write_dict
+from wsfx2.code.util.sql_fun import get_LawQW,connectSQL
 import os
 
 #统计数据集有哪些法条以及这些法条的内容
