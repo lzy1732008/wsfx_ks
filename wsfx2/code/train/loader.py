@@ -3,6 +3,8 @@
 import sys
 import tensorflow.contrib.keras as kr
 from collections import Counter
+import pandas as pd
+import numpy as np
 
 import numpy as np
 
@@ -19,7 +21,7 @@ def data_convert(vectors):
     ssls = list(filter(lambda x:x.strip() != '', vectors))
     return [list(map(float, list(filter(lambda x: x.strip() != '', ss.split('//'))))) for ss in ssls]
 
-
+#2 inputs
 def data_load2(data_f,config):
     input_x1, input_x2,  input_y = [], [], []
     lines = data_f.read().split('\n')
@@ -65,7 +67,7 @@ def batch_iter2(x1, x2,  y, batch_size=128):
         yield x1_shuffle[start_id:end_id],x2_shuffle[start_id:end_id],  y_shuffle[start_id:end_id]
 
 
-
+#3 inputs
 def data_load(data_f, config, flag=1):
     input_x1,input_x2,input_ks,input_y = [], [], [], []
     lines = data_f.read().split('\n')
@@ -95,6 +97,18 @@ def data_load(data_f, config, flag=1):
     train_ks = np.array(input_ks)
 
     return train_1,train_2,train_ks,np.array(input_y)
+
+#2-gram sum
+def data_ngram(inputx):
+    new_inputx = []
+    for batch_a in inputx:
+        batch_t = pd.DataFrame(batch_a)
+        batch_sum = (np.array(batch_t.shift() + batch_a)).tolist()
+        batch_sum.append ([0] * 128)
+        batch_sum = np.array(batch_sum[1:])
+        new_inputx.append(batch_sum)
+    return np.array(new_inputx)
+
 
 def batch_iter(x1, x2, ks, y, batch_size=128):
     """生成批次数据"""

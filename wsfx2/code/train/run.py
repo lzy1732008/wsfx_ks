@@ -12,9 +12,9 @@ from sklearn import metrics
 import tensorflow.contrib.keras as kr
 
 from wsfx2.code.models.model_2 import modelConfig, CNN
-from wsfx2.code.train.loader import batch_iter,data_load
+from wsfx2.code.train.loader import batch_iter,data_load,data_ngram
 
-data_dir = '../../source/dataset/set-3'
+data_dir = '../../source/dataset/set_2'
 trainpath = data_dir+'/train.txt'
 validatepath = data_dir+'/val.txt'
 testpath = data_dir +'/test.txt'
@@ -23,9 +23,9 @@ v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 1
 
-save_dir  = '../../result/set3/model2'  #修改处
-save_path = save_dir+'/checkpoints/30-50/best_validation'  # 最佳验证结果保存路径
-tensorboard_dir = save_dir+'/tensorboard/30-50/'  #修改处
+save_dir  = '../../result/set2/model2'  #修改处
+save_path = save_dir+'/checkpoints/30-50-2gram/best_validation'  # 最佳验证结果保存路径
+tensorboard_dir = save_dir+'/tensorboard/30-50-2gram/'  #修改处
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 if not os.path.exists(tensorboard_dir):
@@ -94,11 +94,16 @@ def train():
     # 载入训练集与验证集
     start_time = time.time()
     train_1,train_2,train_ks, train_output = data_load(t_f,config, ks_flag)
+    #use n-gram**************
+    train_1 = data_ngram(train_1)
     print('train len:',len(train_1))
+
 
 
     # print(train_3)
     val_1, val_2,val_ks, val_output = data_load(v_f,config, ks_flag)
+    # use n-gram**************
+    val_1 = data_ngram(val_1)
     print('validation len:', len(val_1))
 
     time_dif = get_time_dif(start_time)
@@ -165,6 +170,8 @@ def test():
     print("Loading test data...")
     start_time = time.time()
     x1_test, x2_test,ks_test, y_test = data_load(test_f, config, flag=1)
+    #n-gram
+    x1_test = data_ngram(x1_test)
 
     session = tf.Session()
     session.run(tf.global_variables_initializer())

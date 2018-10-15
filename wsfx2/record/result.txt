@@ -1,0 +1,112 @@
+set1+model2:
+Testing...
+Test Loss:   0.37, Test Acc:  77.45%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0      0.881     0.905     0.893       591
+          1      0.786     0.741     0.763       278
+
+avg / total      0.851     0.853     0.852       869
+
+Confusion Matrix...
+[[535  56]
+ [ 72 206]]
+Time usage: 0:00:04
+
+set1+model1:
+Test Loss:   0.38, Test Acc:  74.68%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0      0.839     0.941     0.887       591
+          1      0.830     0.615     0.707       278
+
+avg / total      0.836     0.837     0.829       869
+
+Confusion Matrix...
+[[556  35]
+ [107 171]]
+Time usage: 0:00:05
+
+set1+cnnmodel
+Testing...
+Test Loss:   0.39, Test Acc:  76.75%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0      0.868     0.910     0.889       591
+          1      0.787     0.705     0.744       278
+
+avg / total      0.842     0.845     0.842       869
+
+Confusion Matrix...
+[[538  53]
+ [ 82 196]]
+
+
+set2+model1
+Testing...
+Test Loss:   0.39, Test Acc:  74.80%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0      0.840     0.924     0.880       591
+          1      0.795     0.626     0.700       278
+
+avg / total      0.825     0.829     0.822       869
+
+Confusion Matrix...
+[[546  45]
+ [104 174]]
+Time usage: 0:00:05
+
+set2+model2；
+Testing...
+Test Loss:    0.3, Test Acc:  77.79%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0      0.887     0.902     0.894       591
+          1      0.784     0.755     0.769       278
+
+avg / total      0.854     0.855     0.854       869
+
+Confusion Matrix...
+[[533  58]
+ [ 68 210]]
+Time usage: 0:00:04
+
+set3+model2
+Test Loss:    0.3, Test Acc:  77.91% *****
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0      0.878     0.910     0.894       591
+          1      0.793     0.730     0.760       278
+
+avg / total      0.851     0.853     0.851       869
+
+Confusion Matrix...
+[[538  53]
+ [ 75 203]]
+Time usage: 0:00:04
+
+set2+model2
+Testing...
+Test Loss:   0.28, Test Acc:  76.75%---------------
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0      0.894     0.900     0.897       591
+          1      0.785     0.773     0.779**     278
+
+avg / total      0.859     0.860     0.859       869
+
+Confusion Matrix...
+[[532  59]
+ [ 63 215]]
+Time usage: 0:00:05
+
+
+
