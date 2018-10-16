@@ -78,7 +78,7 @@ Confusion Matrix...
 Time usage: 0:00:04
 
 set3+model2
-Test Loss:    0.3, Test Acc:  77.91% *****
+Test Loss:    0.3, Test Acc:  77.91%
 Precision, Recall and F1-Score...
              precision    recall  f1-score   support
 
@@ -92,7 +92,7 @@ Confusion Matrix...
  [ 75 203]]
 Time usage: 0:00:04
 
-set2+model2
+set2+model2+30-50-2gram
 Testing...
 Test Loss:   0.28, Test Acc:  76.75%---------------
 Precision, Recall and F1-Score...
@@ -103,10 +103,43 @@ Precision, Recall and F1-Score...
 
 avg / total      0.859     0.860     0.859       869
 
+
+set2+model2+30-50-3gram
 Confusion Matrix...
 [[532  59]
  [ 63 215]]
 Time usage: 0:00:05
+
+Testing...
+Test Loss:   0.28, Test Acc:  78.71% *******
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0      0.889     0.905     0.897       591
+          1      0.790     0.759     0.774       278
+
+avg / total      0.857     0.858     0.858       869
+
+Confusion Matrix...
+[[535  56]
+ [ 67 211]]
+Time usage: 0:00:07
+
+set2+model2+30-50-5gram
+Testing...
+Test Loss:   0.26, Test Acc:  78.02%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0      0.899     0.887     0.893       591
+          1      0.766     0.788     0.777       278
+
+avg / total      0.856     0.855     0.856       869
+
+Confusion Matrix...
+[[524  67]
+ [ 59 219]]
+Time usage: 0:00:08
 
 
 

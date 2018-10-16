@@ -99,13 +99,17 @@ def data_load(data_f, config, flag=1):
     return train_1,train_2,train_ks,np.array(input_y)
 
 #2-gram sum
-def data_ngram(inputx):
+def data_ngram(inputx,number):
     new_inputx = []
     for batch_a in inputx:
         batch_t = pd.DataFrame(batch_a)
-        batch_sum = (np.array(batch_t.shift() + batch_a)).tolist()
-        batch_sum.append ([0] * 128)
-        batch_sum = np.array(batch_sum[1:])
+        batch_sum = batch_a
+        for _ in range(number-1):
+            batch_sum = np.array(batch_t.shift() + batch_sum)
+            batch_t = batch_t.shift()
+        batch_sum = (np.array(batch_sum)).tolist()
+        batch_sum.extend ([[0] * 128]*(number-1))
+        batch_sum = np.array(batch_sum[number-1:])
         new_inputx.append(batch_sum)
     return np.array(new_inputx)
 

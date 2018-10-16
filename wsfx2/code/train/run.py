@@ -22,10 +22,11 @@ t_f = open(trainpath,'r',encoding='utf-8')
 v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 1
+n_number = 5
 
 save_dir  = '../../result/set2/model2'  #修改处
-save_path = save_dir+'/checkpoints/30-50-2gram/best_validation'  # 最佳验证结果保存路径
-tensorboard_dir = save_dir+'/tensorboard/30-50-2gram/'  #修改处
+save_path = save_dir+'/checkpoints/30-50-5gram/best_validation'  # 最佳验证结果保存路径
+tensorboard_dir = save_dir+'/tensorboard/30-50-5gram/'  #修改处
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 if not os.path.exists(tensorboard_dir):
@@ -95,7 +96,7 @@ def train():
     start_time = time.time()
     train_1,train_2,train_ks, train_output = data_load(t_f,config, ks_flag)
     #use n-gram**************
-    train_1 = data_ngram(train_1)
+    train_1 = data_ngram(train_1,number=n_number)
     print('train len:',len(train_1))
 
 
@@ -103,7 +104,7 @@ def train():
     # print(train_3)
     val_1, val_2,val_ks, val_output = data_load(v_f,config, ks_flag)
     # use n-gram**************
-    val_1 = data_ngram(val_1)
+    val_1 = data_ngram(val_1,number=n_number)
     print('validation len:', len(val_1))
 
     time_dif = get_time_dif(start_time)
@@ -171,7 +172,7 @@ def test():
     start_time = time.time()
     x1_test, x2_test,ks_test, y_test = data_load(test_f, config, flag=1)
     #n-gram
-    x1_test = data_ngram(x1_test)
+    x1_test = data_ngram(x1_test,number=n_number)
 
     session = tf.Session()
     session.run(tf.global_variables_initializer())
@@ -215,4 +216,4 @@ def test():
     return y_test_cls,y_pred_cls
 
 # train()
-test()
+# test()
