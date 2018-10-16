@@ -205,5 +205,5 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-train()
-# test()
+# train()
+test()
