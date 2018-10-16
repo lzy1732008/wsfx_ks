@@ -11,7 +11,7 @@ import tensorflow as tf
 from sklearn import metrics
 import tensorflow.contrib.keras as kr
 
-from wsfx2.code.models.cnn_model import TCNNConfig, TextCNN
+from wsfx2.code.models.lstm_model import TRNNConfig, TextRNN
 from wsfx2.code.train.loader import batch_iter2,data_load2
 
 data_dir = '../../source/dataset/set_1'
@@ -32,8 +32,8 @@ if not os.path.exists(tensorboard_dir):
     os.makedirs(tensorboard_dir)
 
 
-config = TCNNConfig()
-model = TextCNN(config)
+config = TRNNConfig()
+model = TextRNN(config)
 
 
 
@@ -205,5 +205,5 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-# train()
-test()
+train()
+# test()
