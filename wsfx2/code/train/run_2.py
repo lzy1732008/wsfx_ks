@@ -14,16 +14,16 @@ import tensorflow.contrib.keras as kr
 from wsfx2.code.models.lstm_model import TRNNConfig, TextRNN
 from wsfx2.code.train.loader import batch_iter2,data_load2
 
-data_dir = '../../source/dataset/set_1'
+data_dir = '../../source/dataset/set_2'
 trainpath = data_dir+'/train.txt'
 validatepath = data_dir+'/val.txt'
-testpath = data_dir +'/test-向量化.txt'
+testpath = data_dir +'/test.txt'
 t_f = open(trainpath,'r',encoding='utf-8')
 v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 1
 
-save_dir  = '../../result/set1/cnn_model'  #修改处
+save_dir  = '../../result/set2/lstm_model'  #修改处
 save_path = save_dir+'/checkpoints/30-50/best_validation'  # 最佳验证结果保存路径
 tensorboard_dir = save_dir+'/tensorboard/30-50/'  #修改处
 if not os.path.exists(save_path):
