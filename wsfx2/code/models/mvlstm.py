@@ -90,17 +90,18 @@ class MVLSTM(object):
                                                                   inputs=inputx,
                                                                   initial_state_fw=init_state_fw,
                                                                   initial_state_bw=init_state_bw)
+            return _outputs_1,state_1
 
     def simlarity(self,embed_1,embed_2):
         with tf.name_scope('simlarity'):
             w1 = tf.get_variable('w1',
                                  initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1, dtype=tf.float32),
                                  dtype=tf.float32,
-                                 shape=[self.config.OUTPUT_DIM, 2 * self.config.HIDDEN_DIM, 2 * self.HIDDEN_DIM])
+                                 shape=[self.config.OUTPUT_DIM, 2 * self.config.HIDDEN_DIM, 2 * self.HIDDEN_DIM],trainable=True)
             v1 = tf.get_variable('v1',
                                  initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1, dtype=tf.float32),
                                  dtype=tf.float32,
-                                 shape=[4 * self.config.HIDDEN_DIM, self.config.seq_length_2, self.config.OUTPUT_DIM])
+                                 shape=[4 * self.config.HIDDEN_DIM, self.config.seq_length_2, self.config.OUTPUT_DIM],trainable=True)
 
             forward_result1 = []
             for i in range(self.config.OUTPUT_DIM):
@@ -108,7 +109,7 @@ class MVLSTM(object):
                 r2 = tf.einsum('bld,bdl->bll',r1,tf.transpose(embed_2,[0,2,1]))
                 forward_result1.append(r2)
 
-            forward_result2 = tf.einsum('bld,dlo->bllo',tf.concat([embed_1,embed_2],axis=2))
+            forward_result2 = tf.einsum('bld,dlo->bllo',tf.concat([embed_1,embed_2],axis=2),v1)
 
             forward_result3 = tf.relu(forward_result1+forward_result2)
 
@@ -119,7 +120,7 @@ class MVLSTM(object):
             s2 = tf.reshape(simlarity, shape=[-1, self.config.seq_length_1 * self.config.seq_length_1])
             s3 = tf.nn.top_k(s2, k=self.config.K, sorted=False)
             max_result = tf.reshape(s3, shape=[-1, self.config.OUTPUT_DIM * self.config.K])
-        return max_result
+            return max_result
 
 
     def MLP(self,max_result):
@@ -127,16 +128,16 @@ class MVLSTM(object):
             w2 = tf.get_variable('w2',
                                       initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1,
                                                                                   dtype=tf.float32),
-                                      dtype=tf.float32, shape=[self.config.K * self.config.OUTPUT_DIM, 64])
-            b2 = tf.get_variable('b2', initializer=tf.constant_initializer(), dtype=tf.float32, shape=[64])
+                                      dtype=tf.float32, shape=[self.config.K * self.config.OUTPUT_DIM, 64],trainable=True)
+            b2 = tf.get_variable('b2', initializer=tf.constant_initializer(), dtype=tf.float32, shape=[64],trainable=True)
             fc1 = tf.nn.relu(tf.matmul(max_result, w2) + b2)
             fc1_drop = tf.nn.dropout(fc1, self.keep_prob)
 
             w3 = tf.get_variable('w3',
                                       initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1,
                                                                                   dtype=tf.float32),
-                                      dtype=tf.float32, shape=[64, 2])
-            b3 = tf.get_variable('b3', initializer=tf.constant_initializer(), dtype=tf.float32, shape=[2])
+                                      dtype=tf.float32, shape=[64, 2],trainable=True)
+            b3 = tf.get_variable('b3', initializer=tf.constant_initializer(), dtype=tf.float32, shape=[2],trainable=True)
             fc2 = tf.nn.softmax(tf.matmul(fc1_drop, w3) + b3),1
             return fc2
 
