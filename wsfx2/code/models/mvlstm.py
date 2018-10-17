@@ -55,7 +55,7 @@ class MVLSTM(object):
 
         #MLP
         fc2 = self.MLP(max_result)
-        y_pred_cls = tf.argmax(fc2,1)
+        self.y_pred_cls = tf.argmax(fc2,axis=1)
 
         with tf.name_scope("optimize"):
             # 损失函数，交叉熵
@@ -67,7 +67,7 @@ class MVLSTM(object):
 
         with tf.name_scope("accuracy"):
             # 准确率
-            correct_pred = tf.equal(tf.argmax(self.input_y, 1),y_pred_cls)  # 由于input_y也是onehot编码，因此，调用tf.argmax(self.input_y)得到的是1所在的下表
+            correct_pred = tf.equal(tf.argmax(self.input_y, 1),self.y_pred_cls)  # 由于input_y也是onehot编码，因此，调用tf.argmax(self.input_y)得到的是1所在的下表
             self.acc = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 
 
@@ -108,21 +108,21 @@ class MVLSTM(object):
 
             forward_result1 = []
             for i in range(self.config.OUTPUT_DIM):
-                r1 = tf.einsum('bld,dd->bld',embed_1,w1[i])
-                r2 = tf.einsum('bld,bdl->bll',r1,tf.transpose(embed_2,[0,2,1]))
+                r1 = tf.einsum('bld,df->blf',embed_1,w1[i])
+                r2 = tf.einsum('bld,bdf->blf',r1,tf.transpose(embed_2,[0,2,1]))
                 forward_result1.append(r2)
 
-            forward_result2 = tf.einsum('bld,dlo->bllo',tf.concat([embed_1,embed_2],axis=2),v1)
+            forward_result2 = tf.einsum('bld,dfo->blfo',tf.concat([embed_1,embed_2],axis=2),v1)
 
-            forward_result3 = tf.relu(forward_result1+forward_result2)
+            forward_result3 = tf.nn.relu(tf.reshape(forward_result1,shape=[-1,self.config.seq_length_1,self.config.seq_length_1,self.config.OUTPUT_DIM])+forward_result2)
 
             return forward_result3
 
     def max_pooling(self,simlarity):
         with tf.name_scope("max_pooling"):
             s2 = tf.reshape(simlarity, shape=[-1, self.config.seq_length_1 * self.config.seq_length_1])
-            s3 = tf.nn.top_k(s2, k=self.config.K, sorted=False)
-            max_result = tf.reshape(s3, shape=[-1, self.config.OUTPUT_DIM * self.config.K])
+            value,indexs = tf.nn.top_k(s2, k=self.config.K, sorted=False)
+            max_result = tf.reshape(value, shape=[-1, self.config.OUTPUT_DIM * self.config.K])
             return max_result
 
 
@@ -141,7 +141,7 @@ class MVLSTM(object):
                                                                                   dtype=tf.float32),
                                       dtype=tf.float32, shape=[64, 2],trainable=True)
             b3 = tf.get_variable('b3', initializer=tf.constant_initializer(), dtype=tf.float32, shape=[2],trainable=True)
-            fc2 = tf.nn.softmax(tf.matmul(fc1_drop, w3) + b3),1
+            fc2 = tf.nn.softmax(tf.matmul(fc1_drop, w3) + b3)
             return fc2
 
 

@@ -24,8 +24,8 @@ test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 1
 
 save_dir  = '../../result/set2/mvlstm_model'  #修改处
-save_path = save_dir+'/checkpoints/30-50/best_validation'  # 最佳验证结果保存路径
-tensorboard_dir = save_dir+'/tensorboard/30-50/'  #修改处
+save_path = save_dir+'/checkpoints/30-30-k=5-output=16/best_validation'  # 最佳验证结果保存路径
+tensorboard_dir = save_dir+'/tensorboard/30-30-k=5-output=16/'  #修改处
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 if not os.path.exists(tensorboard_dir):
