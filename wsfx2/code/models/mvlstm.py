@@ -40,12 +40,11 @@ class MVLSTM(object):
         #首先输入一个bilstm
         _outputs_1, state_1 = self.BiLSTM(inputx=self.input_x_1,index=1)
         _outputs_2, state_2 = self.BiLSTM(inputx=self.input_x_2, index=2)
-        fw_state_1 = [0]
-        bw_state_1 = state_1[1]
+        fw_state_1, bw_state_1 = _outputs_1[0], _outputs_1[1]
 
         embed_1 = tf.concat([fw_state_1,bw_state_1], axis=2) #[batch_size,maxtime,hidden_dim]
 
-        fw_state_2, bw_state_2 = state_2[0], state_2[1]
+        fw_state_2, bw_state_2 = _outputs_2[0], _outputs_2[1]
         embed_2 = tf.concat([fw_state_2, bw_state_2], axis=2)
 
         #计算相似度
