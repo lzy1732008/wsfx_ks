@@ -157,4 +157,22 @@ Confusion Matrix...
  [ 79 199]]
 
 
+ set2+mvlstm:
+ /home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set2/mvlstm_model/checkpoints/30-30-k=5-output=16
+ Testing...
+Test Loss:   0.39, Test Acc:  77.33%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0      0.889     0.892     0.890       591
+          1      0.768     0.763     0.765       278
+
+avg / total      0.850     0.850     0.850       869
+
+Confusion Matrix...
+[[527  64]
+ [ 66 212]]
+Time usage: 0:00:06
+
+
 
