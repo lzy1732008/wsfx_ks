@@ -4,6 +4,7 @@ import tensorflow as tf
 class modelconfig(object):
     def __init__(self):
         self.EMBDDING_DIM = 128
+        self.NUM_CLASS = 2
         self.seq_length_1 = 30
         self.seq_length_2 = 30
 
@@ -18,18 +19,18 @@ class modelconfig(object):
         self.save_per_batch = 10
         self.print_per_batch = 10
         self.dropout_keep_prob = 0.5
-        self.num_layers = 2
+        self.num_layers = 1
 
 class MVLSTM(object):
     def __init__(self,config):
         self.config = config
         self.input_x_1 = tf.placeholder(tf.float32,
-                                       [self.config.batch_size, self.config.seq_length_1, self.config.EMBDDING_DIM],
+                                       [None, self.config.seq_length_1, self.config.EMBDDING_DIM],
                                        name='input_x1')
         self.input_x_2 = tf.placeholder(tf.float32,
-                                       [self.config.batch_size, self.config.seq_length_2, self.config.EMBDDING_DIM],
+                                       [None, self.config.seq_length_2, self.config.EMBDDING_DIM],
                                        name='input_x2')
-        self.input_y = tf.placeholder(tf.int32, [self.config.batch_size, self.config.NUM_CLASS], name='input_y')
+        self.input_y = tf.placeholder(tf.int32, [None, self.config.NUM_CLASS], name='input_y')
         self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
         self.mv_lstm()
@@ -39,8 +40,11 @@ class MVLSTM(object):
         #首先输入一个bilstm
         _outputs_1, state_1 = self.BiLSTM(inputx=self.input_x_1,index=1)
         _outputs_2, state_2 = self.BiLSTM(inputx=self.input_x_2, index=2)
-        fw_state_1,bw_state_1 = state_1[0], state_1[1]
+        fw_state_1 = [0]
+        bw_state_1 = state_1[1]
+
         embed_1 = tf.concat([fw_state_1,bw_state_1], axis=2) #[batch_size,maxtime,hidden_dim]
+
         fw_state_2, bw_state_2 = state_2[0], state_2[1]
         embed_2 = tf.concat([fw_state_2, bw_state_2], axis=2)
 
@@ -69,7 +73,7 @@ class MVLSTM(object):
 
 
     def lstm_cell(self):
-        return tf.contrib.rnn.BasicLSTMCell(self.config.hidden_dim, forget_bias= 1.0, state_is_tuple=True)
+        return tf.contrib.rnn.BasicLSTMCell(self.config.HIDDEN_DIM, forget_bias= 1.0, state_is_tuple=True)
 
     def dropout(self):  # 为每一个rnn核后面加一个dropout层
         return tf.contrib.rnn.DropoutWrapper(self.lstm_cell(), output_keep_prob=self.keep_prob)
@@ -97,7 +101,7 @@ class MVLSTM(object):
             w1 = tf.get_variable('w1',
                                  initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1, dtype=tf.float32),
                                  dtype=tf.float32,
-                                 shape=[self.config.OUTPUT_DIM, 2 * self.config.HIDDEN_DIM, 2 * self.HIDDEN_DIM],trainable=True)
+                                 shape=[self.config.OUTPUT_DIM, 2 * self.config.HIDDEN_DIM, 2 * self.config.HIDDEN_DIM],trainable=True)
             v1 = tf.get_variable('v1',
                                  initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.1, dtype=tf.float32),
                                  dtype=tf.float32,
