@@ -21,14 +21,14 @@ import tensorflow as tf
 #     sum.append([0]*len(n[0]))
 #     print(sum[1:])
 
-# num = tf.constant([[[1,2,3],[4,5,6],[1,1,1],[1,1,1]],[[7,8,9],[10,11,12],[2,2,2],[1,1,1]]])
+num = tf.constant([[[1,2,3],[4,5,6],[1,1,1],[1,1,1]],[[7,8,9],[10,11,12],[2,2,2],[1,1,1]]])
 # num2 = tf.constant([[[1,2,3],[4,5,6],[1,1,1],[1,1,1]],[[7,8,9],[10,11,12],[2,2,2],[1,1,1]]])
-# # r1 = tf.keras.backend.repeat_elements(num,2,axis=1)
-# # r2 = tf.reshape(r1,shape=[2,4,2,3])
+# r1 = tf.keras.backend.repeat_elements(num,2,axis=2)
+# r2 = tf.reshape(r1,shape=[2,4,2,3])
 # with tf.Session() as sess:
 #       print(sess.run(num * num2))
 #     print(sess.run(r1))
-#     print(r1.shape)
+# #     print(r1.shape)
 #     print(sess.run(r2))
 
 

@@ -57,8 +57,11 @@ class CNN(object):
             ksw = tf.einsum('abc,cd->abd', ks, weight_1) #[None, 3, d]
             ew = tf.einsum('abc,cd->abd', inputx, weight_2) #[None, l, d]
 
+            print('ksw.shape',ksw.shape)
             ksw_mul_pre = tf.keras.backend.repeat_elements(ksw, rep=self.config.FACT_LEN, axis = 1)
+            print('ksw_mul_pre.shape', ksw_mul_pre.shape)
             ksw_mul = tf.reshape(ksw_mul_pre, shape=[None, self.config.KS_LEN,self.config.FACT_LEN,self.config.EMBDDING_DIM])
+            print('ksw_mul.shape', ksw_mul.shape)
             ew_mul = tf.expand_dims(ew, axis=2)
 
             temp1 = tf.concat([ksw_mul,ew_mul], axis=2)#[None, l, 4, d]
