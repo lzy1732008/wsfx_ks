@@ -50,7 +50,7 @@ def data_load2(data_f,config):
 
     return train_1, train_2,  np.array(input_y)
 
-
+#used with data_load2
 def batch_iter2(x1, x2,  y, batch_size=128):
     """生成批次数据"""
     data_len = len(x1)
@@ -68,10 +68,10 @@ def batch_iter2(x1, x2,  y, batch_size=128):
 
 
 #3 inputs
-def data_load(data_f, config, flag=1):
+def data_load(data_f, config, flag=3):
     input_x1,input_x2,input_ks,input_y = [], [], [], []
     lines = data_f.read().split('\n')
-    for i in range(len(lines)):
+    for i in range(300):
         line = lines[i]
         print('index:',i)
         if line.strip() == "":
@@ -88,7 +88,10 @@ def data_load(data_f, config, flag=1):
         input_x2.append(data_convert(ftzwls))
         if label==0: input_y.append([1,0])
         else: input_y.append([0,1])
-        zs_matrix = np.mean(data_convert(zsls),axis=0)
+        if flag == 1:#mean vectors of words of 'jie'
+           zs_matrix = np.mean(data_convert(zsls),axis=0)
+        else:
+            zs_matrix = data_convert(zsls)
         input_ks.append(zs_matrix)
 
 

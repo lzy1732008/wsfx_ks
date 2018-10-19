@@ -9,7 +9,7 @@ class modelConfig(object):
     def __init__(self):
         self.EMBDDING_DIM = 128
         self.FACT_LEN = 30
-        self.LAW_LEN = 50
+        self.LAW_LEN = 30
         self.KS_LEN= 3
 
         self.FILTERS = 256
@@ -57,7 +57,8 @@ class CNN(object):
             ksw = tf.einsum('abc,cd->abd', ks, weight_1) #[None, 3, d]
             ew = tf.einsum('abc,cd->abd', inputx, weight_2) #[None, l, d]
 
-            ksw_mul = tf.keras.backend.repeat(ksw, self.config.FACT_LEN)
+            ksw_mul_pre = tf.keras.backend.repeat_elements(ksw, rep=self.config.FACT_LEN, axis = 1)
+            ksw_mul = tf.reshape(ksw_mul_pre, shape=[None, self.config.KS_LEN,self.config.FACT_LEN,self.config.EMBDDING_DIM])
             ew_mul = tf.expand_dims(ew, axis=2)
 
             temp1 = tf.concat([ksw_mul,ew_mul], axis=2)#[None, l, 4, d]

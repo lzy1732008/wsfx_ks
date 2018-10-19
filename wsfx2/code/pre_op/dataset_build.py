@@ -211,7 +211,7 @@ def fun4(data_f, targte_f, model_ss, model_ft):
         news += '|'
         for zw in ftzwls: news += '//'.join(map(str,list(vector(zw, model_ft)))) + ' '
         news += '|'+array[3] +'|'
-        news += zsVector(zsls,model_ft,flag=1)+'\n'
+        news += zsVector(zsls,model_ft,flag=3)+'\n'
     targte_f.write(news)
 
 
@@ -230,8 +230,6 @@ def zsVector(zwls, word_m,flag=1):
             content = zw.split(':')[1].strip()
             if level == '':
                 continue
-            if content == '':
-                s += '//'.join([0]*128)+' '
             else:
                 conls = content.split(' ')
                 vectors = []
@@ -247,15 +245,15 @@ def zsVector(zwls, word_m,flag=1):
 
         #将得到的matrix存储到s中
         for line in matrix:
-            print(line)
+            # print(line)
             s += '//'.join(map(str,list(line))) + ' '
     return s
 
 '''
 训练数据
 '''
-# data_f= open('../../source/dataset/set-3/val-分词.txt','r',encoding='utf-8')
-# tartget_f = open('../../source/dataset/set-3/val.txt','w',encoding='utf-8')
+# data_f= open('../../source/dataset/set_1/test-分词.txt','r',encoding='utf-8')
+# tartget_f = open('../../source/dataset/set_4/test.txt','w',encoding='utf-8')
 # model_ss = load_models('../../source/wordvector/ssmodel_size128.model')
 # model_ft = load_models('../../source/wordvector/ssmodel_size128.model')
 # fun4(data_f,tartget_f,model_ss,model_ft)
@@ -268,7 +266,6 @@ def zsVector(zwls, word_m,flag=1):
 # model_ss = load_models('../../source/wordvector/ssmodel_size128.model')
 # model_ft = load_models('../../source/wordvector/ssmodel_size128.model')
 # fun4(data_f,tartget_f,model_ss,model_ft)
-
 # ========================================================================================================================
 '''
 切分训练集数据:训练集/验证集 = 9000/2447

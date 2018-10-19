@@ -11,7 +11,8 @@
 #     t = sess.run(tf.reshape(num,shape=[3,]))
 #     print(sess.run(tf.reshape(t,shape=[2,3,2])))
 
-import numpy as np
+
+import tensorflow as tf
 # import pandas as pd
 # num = np.array([[[1,2,3],[4,5,6],[1,1,1]],[[7,8,9],[10,11,12],[2,2,2]]])
 # for n in num:
@@ -20,9 +21,16 @@ import numpy as np
 #     sum.append([0]*len(n[0]))
 #     print(sum[1:])
 
-num = np.array([[[1,2,3],[4,5,6],[1,1,1],[1,1,1]],[[7,8,9],[10,11,12],[2,2,2],[1,1,1]]])
-from wsfx2.code.train.loader import data_ngram
-print(data_ngram(num,number=3))
+# num = tf.constant([[[1,2,3],[4,5,6],[1,1,1],[1,1,1]],[[7,8,9],[10,11,12],[2,2,2],[1,1,1]]])
+# num2 = tf.constant([[[1,2,3],[4,5,6],[1,1,1],[1,1,1]],[[7,8,9],[10,11,12],[2,2,2],[1,1,1]]])
+# # r1 = tf.keras.backend.repeat_elements(num,2,axis=1)
+# # r2 = tf.reshape(r1,shape=[2,4,2,3])
+# with tf.Session() as sess:
+#       print(sess.run(num * num2))
+#     print(sess.run(r1))
+#     print(r1.shape)
+#     print(sess.run(r2))
+
 
 
 
