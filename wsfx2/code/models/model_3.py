@@ -59,15 +59,15 @@ class CNN(object):
 
             print('ksw.shape',ksw.shape)
             ksw_mul_pre = tf.keras.backend.repeat_elements(ksw, rep=self.config.FACT_LEN, axis = 1)
-            print('ksw_mul_pre.shape', ksw_mul_pre.shape)
-            ksw_mul = tf.reshape(ksw_mul_pre, shape=[None, self.config.KS_LEN,self.config.FACT_LEN,self.config.EMBDDING_DIM])
+            print('ksw_mul_pre.type', ksw_mul_pre)
+            ksw_mul = tf.reshape(ksw_mul_pre, shape=[-1, self.config.FACT_LEN, self.config.KS_LEN,self.config.EMBDDING_DIM])
             print('ksw_mul.shape', ksw_mul.shape)
             ew_mul = tf.expand_dims(ew, axis=2)
 
             temp1 = tf.concat([ksw_mul,ew_mul], axis=2)#[None, l, 4, d]
             pw = tf.sigmoid(temp1) #[None, l, 4, d]
             new_vector1 = tf.reduce_mean(temp1 * pw, axis=2) #[None, l, 1, d]
-            new_vector = tf.reshape(new_vector1, shape=inputx.shape)
+            new_vector = tf.reshape(new_vector1, shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
 
         return new_vector
 

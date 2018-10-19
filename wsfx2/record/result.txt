@@ -175,4 +175,20 @@ Confusion Matrix...
 Time usage: 0:00:06
 
 
+Testing...
+Test Loss:   0.27, Test Acc:  77.45%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0      0.895     0.892     0.893       591
+          1      0.771     0.777     0.774       278
+
+avg / total      0.855     0.855     0.855       869
+
+Confusion Matrix...
+[[527  64]
+ [ 62 216]]
+Time usage: 0:00:04
+
+
 

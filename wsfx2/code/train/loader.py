@@ -71,7 +71,7 @@ def batch_iter2(x1, x2,  y, batch_size=128):
 def data_load(data_f, config, flag=3):
     input_x1,input_x2,input_ks,input_y = [], [], [], []
     lines = data_f.read().split('\n')
-    for i in range(300):
+    for i in range(len(lines)):
         line = lines[i]
         print('index:',i)
         if line.strip() == "":
