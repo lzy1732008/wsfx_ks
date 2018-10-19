@@ -1,4 +1,4 @@
-#添加多级先验知识,
+#添加多级先验知识,gate is differ from model_3.py
 
 #基于CNN，只使用最精细的那个先验知识，conv1d
 
@@ -66,7 +66,7 @@ class CNN(object):
 
             temp1 = tf.concat([ksw_mul,ew_mul], axis=2)#[None, l, 4, d]
             pw = tf.sigmoid(temp1) #[None, l, 4, d]
-            new_vector1 = tf.reduce_mean(temp1 * pw, axis=2) #[None, l, 1, d]
+            new_vector1 = tf.reduce_sum(temp1 * pw, axis=2) #[None, l, 1, d]
             new_vector = tf.reshape(new_vector1, shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
 
         return new_vector

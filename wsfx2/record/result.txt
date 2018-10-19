@@ -177,19 +177,141 @@ Time usage: 0:00:06
 set2+model3:
 /home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model3_model/checkpoints/30-30
 Testing...
-Test Loss:   0.27, Test Acc:  77.45%
+Test Loss:   0.26, Test Acc:  77.68%
 Precision, Recall and F1-Score...
              precision    recall  f1-score   support
 
-          0      0.895     0.892     0.893       591
-          1      0.771     0.777     0.774       278
+          0     0.8947    0.8917    0.8932       591
+          1     0.7714    0.7770    0.7742       278
 
-avg / total      0.855     0.855     0.855       869
+avg / total     0.8553    0.8550    0.8551       869
 
 Confusion Matrix...
 [[527  64]
  [ 62 216]]
-Time usage: 0:00:04
+Time usage: 0:00:05
+
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model3_model/checkpoints/30-30-2gram
+Testing...
+Test Loss:   0.27, Test Acc:  76.64%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.9000    0.8680    0.8837       591
+          1     0.7391    0.7950    0.7660       278
+
+avg / total     0.8485    0.8446    0.8461       869
+
+Confusion Matrix...
+[[513  78]
+ [ 57 221]]
+Time usage: 0:00:08
+
+
+set4+model4:
+5-gram:because writing error
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model4/checkpoints/30-30-2gram
+Testing...
+Test Loss:   0.26, Test Acc:  77.91%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8983    0.8968    0.8975       591
+          1     0.7814    0.7842    0.7828       278
+
+avg / total     0.8609    0.8608    0.8608       869
+
+Confusion Matrix...
+[[530  61]
+ [ 60 218]]
+Time usage: 0:00:08
+
+2-gram:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model4/checkpoints/30-30-5gram
+Testing...
+Test Loss:   0.35, Test Acc:  77.33%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8947    0.8917    0.8932       591
+          1     0.7714    0.7770    0.7742       278
+
+avg / total     0.8553    0.8550    0.8551       869
+
+Confusion Matrix...
+[[527  64]
+ [ 62 216]]
+Time usage: 0:00:06
+
+3-gram:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model4/tensorboard/30-30-3gram
+Testing...
+Test Loss:   0.36, Test Acc:  77.45%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8949    0.8934    0.8942       591
+          1     0.7742    0.7770    0.7756       278
+
+avg / total     0.8563    0.8562    0.8562       869
+
+Confusion Matrix...
+[[528  63]
+ [ 62 216]]
+Time usage: 0:00:06
+
+8-gram:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model4/tensorboard/30-30-8gram
+Testing...
+Test Loss:   0.27, Test Acc:  78.94%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.9007    0.9052    0.9030       591
+          1     0.7964    0.7878    0.7920       278
+
+avg / total     0.8673    0.8677    0.8675       869
+
+Confusion Matrix...
+[[535  56]
+ [ 59 219]]
+Time usage: 0:00:11
+
+10-gram
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model4/tensorboard/30-30-10gram
+Testing...
+Test Loss:   0.24, Test Acc:  78.71%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8926    0.9137    0.9030       591
+          1     0.8068    0.7662    0.7860       278
+
+avg / total     0.8651    0.8665    0.8656       869
+
+Confusion Matrix...
+[[540  51]
+ [ 65 213]]
+Time usage: 0:00:13
+
+1-gram
+Testing...
+Test Loss:   0.23, Test Acc:  78.25%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.9003    0.9019    0.9011       591
+          1     0.7906    0.7878    0.7892       278
+
+avg / total     0.8652    0.8654    0.8653       869
+
+Confusion Matrix...
+[[533  58]
+ [ 59 219]]
+Time usage: 0:00:05
+
+
+
 
 
 
