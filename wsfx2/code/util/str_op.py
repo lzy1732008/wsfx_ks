@@ -30,7 +30,7 @@ def showClassNum(content):
     print('0:',class_0)
     print('1:',class_1)
 
-f = open('../../source/dataset/set_1/val-分词.txt','r',encoding='utf-8')
-lines = f.read()
-showClassNum(lines)
+# f = open('../../source/dataset/set_1/val-分词.txt','r',encoding='utf-8')
+# lines = f.read()
+# showClassNum(lines)
 

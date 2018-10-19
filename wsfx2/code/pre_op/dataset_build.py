@@ -4,6 +4,7 @@ from wsfx2.code.util.str_op import getStrSegment
 from wsfx2.code.pre_op.word2vec import vector,load_models
 
 import os,random,shutil
+import numpy as np
 import jieba.posseg as pos
 
 '''
@@ -216,11 +217,38 @@ def fun4(data_f, targte_f, model_ss, model_ft):
 
 def zsVector(zwls, word_m,flag=1):
     s =''
-    #只对最细致的那个level进行向量化
-    if flag==1:
+    if flag == 1:#只对最细致的那个level进行向量化
         obls = zwls[-2].split(':')[1].split(' ')
         for ob in obls:
             s += '//'.join(map(str,list(vector(ob,word_m)))) +' '
+    else:#将层级目录分为三级：名字/章/节(包含?:),向量化
+        matrix = np.zeros(shape=[3,128],dtype=float)
+        for zw in zwls:
+            if zw.strip() == '':
+                continue
+            level = zw.split(':')[0].strip()
+            content = zw.split(':')[1].strip()
+            if level == '':
+                continue
+            if content == '':
+                s += '//'.join([0]*128)+' '
+            else:
+                conls = content.split(' ')
+                vectors = []
+                for ob in conls:
+                    vectors.append(list(vector(ob,word_m)))
+                vectors = np.mean(np.array(vectors),axis=0)
+                if level == 'ft':
+                    matrix[0] = vectors
+                elif level == '章':
+                    matrix[1] = vectors
+                elif level == '节' or level == '?':
+                    matrix[2] = vectors
+
+        #将得到的matrix存储到s中
+        for line in matrix:
+            print(line)
+            s += '//'.join(map(str,list(line))) + ' '
     return s
 
 '''
@@ -279,7 +307,7 @@ def fun4(data_f,wsls,targetpath):
 
 # ========================================================================================================================
 '''
-move dataset
+move dataset，将分好的训练集、验证集文件都移动到对应文件夹
 '''
 def fun5(data_f,sourcepath,targetpath):
     lines = data_f.read().split('\n')
@@ -305,7 +333,6 @@ def fun5(data_f,sourcepath,targetpath):
 # dir = os.listdir(sourcepath)
 # print(len(dir))
 # fun5(f,sourcepath,targetpath)
-
 
 
 
