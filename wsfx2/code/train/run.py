@@ -22,7 +22,7 @@ t_f = open(trainpath,'r',encoding='utf-8')
 v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 3 #kw level
-n_number = 1 #n-gram
+n_number = 15 #n-gram
 
 save_dir  = '../../result/set4/model4'  #修改处
 save_path = save_dir+'/checkpoints/30-30-'+str(n_number)+'gram/best_validation'  # 最佳验证结果保存路径
