@@ -17,7 +17,6 @@ else:
     is_py3 = False
 
 def data_convert(vectors):
-
     ssls = list(filter(lambda x:x.strip() != '', vectors))
     return [list(map(float, list(filter(lambda x: x.strip() != '', ss.split('//'))))) for ss in ssls]
 
@@ -43,7 +42,6 @@ def data_load2(data_f,config):
             input_y.append([1, 0])
         else:
             input_y.append([0, 1])
-
 
     train_1 = kr.preprocessing.sequence.pad_sequences(np.array(input_x1), config.seq_length_1)
     train_2 = kr.preprocessing.sequence.pad_sequences(np.array(input_x2), config.seq_length_2)
@@ -100,6 +98,60 @@ def data_load(data_f, config, flag=3):
     train_ks = np.array(input_ks)
 
     return train_1,train_2,train_ks,np.array(input_y)
+
+#5-input
+def data_load5(data_f,config):
+    input_x1, x1_len, x2_len, input_x2,  input_y = [], [], [], [], []
+    lines = data_f.read().split('\n')
+    for i in range(len(lines)):
+        line = lines[i]
+        print('index:', i)
+        if line.strip() == "":
+            continue
+
+        array = line.split('|')
+        if len(array) < 6:
+            print(line)
+            continue
+        ss_len = int(array[1])
+        ssls = map(int,list(filter(lambda x:x.strip()!='',array[2].split(' '))))
+        ft_len = int(array[3])
+        ftzwls = map(int,list(filter(lambda x:x.strip()!='',array[4].split(' '))))
+        label = int(array[5].strip())
+        input_x1.append(ssls)
+        input_x2.append(ftzwls)
+        x1_len.append(ss_len)
+        x2_len.append(ft_len)
+        if label == 0:
+            input_y.append([1, 0])
+        else:
+            input_y.append([0, 1])
+
+    train_1 = kr.preprocessing.sequence.pad_sequences(np.array(input_x1), config.data1_maxlen)
+    train_2 = kr.preprocessing.sequence.pad_sequences(np.array(input_x2), config.data2_maxlen)
+
+    return x1_len, train_1,  x2_len, train_2,  np.array(input_y)
+
+#used with data_load5
+def batch_iter5(x1_len, x1, x2_len, x2,  y, batch_size=128):
+    """生成批次数据"""
+    data_len = len(x1)
+    num_batch = int(data_len / batch_size)
+
+    indices = np.random.permutation(np.arange(data_len)) #洗牌
+    x1_len_shuffle = x1_len[indices]
+    x1_shuffle = x1[indices]
+    x2_len_shuffle = x2_len[indices]
+    x2_shuffle = x2[indices]
+    y_shuffle = y[indices]
+
+    for i in range(num_batch):
+        start_id = i * batch_size
+        end_id = min((i + 1) * batch_size, data_len)
+        yield x1_len_shuffle[start_id:end_id],x1_shuffle[start_id:end_id],x2_len_shuffle[start_id:end_id],x2_shuffle[start_id:end_id],  y_shuffle[start_id:end_id]
+
+
+
 
 #2-gram sum
 def data_ngram(inputx,number):
