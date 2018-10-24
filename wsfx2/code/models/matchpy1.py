@@ -12,32 +12,33 @@ import numpy as np
 Model Class
 """
 class modelconfig():
-    def __init__(self):
+    def __init__(self,embedding):
         self.data1_maxlen = 30
         self.data2_maxlen = 50
-        self.embedding = 50
+        self.embedding = embedding
         self.data1_psize = 3
         self.data2_psize = 5
         self.LEARNING_RATE = 0.001
         self.batch_size = 128
         self.dropout_keep_prob = 0.5
+        self.num_epochs = 2000
+        self.save_per_batch = 100
+        self.print_per_batch = 10
 
 
 class MatchPy():
 
     def __init__(self, config):
         self.config = config
-        tf.reset_default_graph()
         self.X1 = tf.placeholder(tf.int32, name='X1', shape=(None, self.config.data1_maxlen))
         self.X2 = tf.placeholder(tf.int32, name='X2', shape=(None, self.config.data2_maxlen))
         self.X1_len = tf.placeholder(tf.int32, name='X1_len', shape=(None,))
         self.X2_len = tf.placeholder(tf.int32, name='X2_len', shape=(None,))
         self.Y = tf.placeholder(tf.int32, name='Y',shape=(None,2))
-        self.keep_prob = tf.placeholder(tf.int32, name='keep_prob',shape=(None,))
+        self.keep_prob = tf.placeholder(tf.float32, name='keep_prob')
 
 
-        self.dpool_index = self.dynamic_pooling_index(self.X1_len, self.X2_len,
-                                                      self.config.data1_maxlen,self.confi.data2_maxlen)
+        self.dpool_index = tf.placeholder(tf.int32,name='dpool_index', shape=(None,self.config.data1_maxlen,self.config.data2_maxlen,3))
 
         self.batch_size = tf.shape(self.X1)[0]
 
@@ -58,6 +59,8 @@ class MatchPy():
         self.b1 = tf.get_variable('b1', initializer=tf.constant_initializer(), dtype=tf.float32, shape=[8])
         # batch_size * X1_maxlen * X2_maxlen * feat_out
         self.conv1 = tf.nn.relu(tf.nn.conv2d(self.cross_img, self.w1, [1, 1, 1, 1], "SAME") + self.b1)
+        print('conv1.shape:'+str(self.conv1.shape))
+        print('dpool_index.shape:'+str(self.dpool_index.shape))
 
         # dynamic pooling
         self.conv1_expand = tf.gather_nd(self.conv1, self.dpool_index)
@@ -68,10 +71,10 @@ class MatchPy():
                                      self.config.data2_maxlen / self.config.data2_psize, 1], "VALID")
 
         with tf.variable_scope('fc'):
-            fc = tf.layers.dense(inputs=tf.reshape(self.pool1, [self.batch_size, self.config.data1_psize * self.config.data2_psize * 8]),
+            fc1 = tf.layers.dense(inputs=tf.reshape(self.pool1, [self.batch_size, self.config.data1_psize * self.config.data2_psize * 8]),
                                        units=20,use_bias=True,trainable=True,name="fc1")
-            fc = tf.contrib.layers.dropout(fc, self.keep_prob)
-            fc = tf.nn.relu(fc)
+            fc1_ = tf.contrib.layers.dropout(fc1, self.keep_prob)
+            fc = tf.nn.relu(fc1_)
             self.logits = tf.layers.dense(fc, 2)
             self.y_pred_cls = tf.argmax(tf.nn.softmax(self.logits), 1)
 
@@ -96,8 +99,10 @@ class MatchPy():
             stride2 = 1.0 * max_len2 / len2_one
             idx1_one = [int(i / stride1) for i in range(max_len1)]
             idx2_one = [int(i / stride2) for i in range(max_len2)]
+            # if idx1_one.count(82) > 0 or idx2_one.count(82) > 0:
+            #     print(stride1,stride2,idx1_one,idx2_one,batch_idx,len1_one,len2_one)
             mesh1, mesh2 = np.meshgrid(idx1_one, idx2_one)
-            index_one = np.transpose(np.stack([np.ones(mesh1.shape) * batch_idx, mesh1, mesh2]), (2, 1, 0))
+            index_one = np.transpose(np.stack([np.ones(mesh1.shape) * batch_idx, mesh1, mesh2]),[2,1,0])
             return index_one
 
         index = []

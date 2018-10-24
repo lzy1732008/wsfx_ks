@@ -110,16 +110,19 @@ def data_load5(data_f,config):
             continue
 
         array = line.split('|')
-        if len(array) < 6:
+        ft_len = int(array[3])
+        ss_len = int(array[1])
+        if len(array) < 6 or ft_len*ss_len == 0:
             print(line)
             continue
-        ss_len = int(array[1])
-        ssls = map(int,list(filter(lambda x:x.strip()!='',array[2].split(' '))))
-        ft_len = int(array[3])
-        ftzwls = map(int,list(filter(lambda x:x.strip()!='',array[4].split(' '))))
+
+        ssls = list(map(int,list(filter(lambda x:x.strip()!='',array[2].split(' ')))))
+        ftzwls = list(map(int,list(filter(lambda x:x.strip()!='',array[4].split(' ')))))
         label = int(array[5].strip())
         input_x1.append(ssls)
         input_x2.append(ftzwls)
+        if ss_len > config.data1_maxlen: ss_len = config.data1_maxlen
+        if ft_len > config.data2_maxlen: ft_len = config.data2_maxlen
         x1_len.append(ss_len)
         x2_len.append(ft_len)
         if label == 0:
@@ -130,10 +133,10 @@ def data_load5(data_f,config):
     train_1 = kr.preprocessing.sequence.pad_sequences(np.array(input_x1), config.data1_maxlen)
     train_2 = kr.preprocessing.sequence.pad_sequences(np.array(input_x2), config.data2_maxlen)
 
-    return x1_len, train_1,  x2_len, train_2,  np.array(input_y)
+    return np.array(x1_len), np.array(train_1),  np.array(x2_len), np.array(train_2),  np.array(input_y)
 
 #used with data_load5
-def batch_iter5(x1_len, x1, x2_len, x2,  y, batch_size=128):
+def batch_iter5(x1_len, x1, x2_len, x2,  y,  batch_size=128):
     """生成批次数据"""
     data_len = len(x1)
     num_batch = int(data_len / batch_size)
@@ -148,9 +151,17 @@ def batch_iter5(x1_len, x1, x2_len, x2,  y, batch_size=128):
     for i in range(num_batch):
         start_id = i * batch_size
         end_id = min((i + 1) * batch_size, data_len)
-        yield x1_len_shuffle[start_id:end_id],x1_shuffle[start_id:end_id],x2_len_shuffle[start_id:end_id],x2_shuffle[start_id:end_id],  y_shuffle[start_id:end_id]
+        yield x1_len_shuffle[start_id:end_id],x1_shuffle[start_id:end_id],x2_len_shuffle[start_id:end_id], x2_shuffle[start_id:end_id],  y_shuffle[start_id:end_id]
 
 
+def embedding_load(words_f):
+    cpslist = words_f.read().split('\n')
+    embedding_dict = {}
+    for i in range(len(cpslist)): embedding_dict[cpslist[i].strip()] = i + 1
+    embedding_dict['NOT_FOUND'] = len(cpslist) + 1
+    embedding_dict['PAD'] = 0
+    embedding = np.float32(np.random.uniform(-0.02, 0.02, [len(embedding_dict), 50]))
+    return embedding
 
 
 #2-gram sum

@@ -349,7 +349,8 @@ def fun6(corpus,target):
             w = w.strip()
             if w != '' and w not in cpslist:
                 cpslist.append(w)
-    target.write('\n'.split(cpslist))
+    print('words size:'+str(len(cpslist)))
+    target.write('\n'.join(cpslist))
     target.close()
 
 
@@ -357,9 +358,9 @@ def fun8(wordls,cps_dict):
     w_ids = []
     for w in wordls:
         try:
-            w_ids.append(cps_dict[w])
+            w_ids.append(str(cps_dict[w]))
         except:
-            w_ids.append(len(cps_dict)+2)
+            w_ids.append(str(len(cps_dict)+1))
     return w_ids
 
 
@@ -377,15 +378,33 @@ def fun7(source,corpus,target):
             label = array[3]
             ss_ids = fun8(ssls,cps_dict)
             ft_ids = fun8(ftls,cps_dict)
-            newlines.append(array[0]+'|'+str(len(ss_ids))+'|'+' '.join(ss_ids)+'|'+str(len(ft_ids))+'|'+' '.join(ft_ids)+'|'+label)
+            newlines.append(array[0]+'|'+str(len(ss_ids))+'|'+' '.join(ss_ids)+'|'+str(len(ft_ids))+'|'+' '.join(ft_ids)+'|'+str(label))
         else:
             print("ERROR:"+line)
     target.write('\n'.join(newlines))
     target.close()
 
 
+'''
+set dictionary
+'''
+# sourcepath = '../../source/wordvector/corpus.txt'
+# corpuspath = '../../source/wordvector/words.txt'
+# f1 = open(sourcepath,'r',encoding='utf-8')
+# f2 = open(corpuspath,'w',encoding='utf-8')
+# fun6(f1,f2)
 
 
+'''
+convert input text into ids
+'''
+corpuspath = '../../source/wordvector/words.txt'
+sourcepath = '../../source/dataset/set_1/val-分词.txt'
+targetpath = '../../source/dataset/set_5/val.txt'
+f1 = open(sourcepath,'r',encoding='utf-8')
+f2 = open(corpuspath,'r',encoding='utf-8')
+f3 = open(targetpath,'w',encoding='utf-8')
+fun7(f1,f2,f3)
 
 
 

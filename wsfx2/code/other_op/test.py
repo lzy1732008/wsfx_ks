@@ -32,6 +32,17 @@ import tensorflow as tf
 #     print(sess.run(r2))
 
 
+# import numpy as np
+# s = [[1,2,3],[4,5,6]]
+# print(s.count([1,2,3]))
+
+
+import tensorflow.contrib.keras as kr
+s1=[[1,2,3,4,5]]
+s2=[[1,2]]
+print(kr.preprocessing.sequence.pad_sequences(s1,3))
+print(kr.preprocessing.sequence.pad_sequences(s2,3))
+
 
 
 
