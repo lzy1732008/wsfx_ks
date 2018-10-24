@@ -174,7 +174,7 @@ def test():
     print("Loading test data...")
     start_time = time.time()
     x1_len_test, x1_test, x2_len_test, x2_test, y_test = data_load5(test_f, config)
-    dpool_index_test = model.dynamic_pooling_index(x1_len_test,x2_len_test,config.data1_maxlen, config.data2_maxlen)
+
 
     session = tf.Session()
     session.run(tf.global_variables_initializer())
@@ -182,7 +182,7 @@ def test():
     saver.restore(sess=session, save_path=save_path)  # 读取保存的模型
 
     print('Testing...')
-    loss_test, acc_test = evaluate(session, x1_len_test, x1_test,x2_len_test, x2_test,  y_test, dpool_index_test)
+    loss_test, acc_test = evaluate(session, x1_len_test, x1_test,x2_len_test, x2_test,  y_test)
     msg = 'Test Loss: {0:>6.2}, Test Acc: {1:>7.2%}'
     print(msg.format(loss_test, acc_test))
 
@@ -195,12 +195,13 @@ def test():
     for i in range(num_batch):  # 逐批次处理
         start_id = i * batch_size
         end_id = min((i + 1) * batch_size, data_len)
+        dpool_index = model.dynamic_pooling_index(x1_len_test[start_id:end_id],x2_len_test[start_id:end_id],config.data1_maxlen, config.data2_maxlen)
         feed_dict = {
             model.X1_len: x1_len_test[start_id:end_id],
             model.X1: x1_test[start_id:end_id],
             model.X2_len: x2_len_test[start_id:end_id],
             model.X2: x2_test[start_id:end_id],
-            model.dpool_index: dpool_index_test[start_id:end_id],
+            model.dpool_index:  dpool_index,
             model.keep_prob: 1.0   #这个表示测试时不使用dropout对神经元过滤
         }
         y_pred_cls[start_id:end_id] = session.run(model.y_pred_cls, feed_dict=feed_dict)   #将所有批次的预测结果都存放在y_pred_cls中
@@ -219,5 +220,5 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-train()
-# test()
+# train()
+test()

@@ -327,6 +327,23 @@ Confusion Matrix...
 Time usage: 0:00:05
 
 
+matchpy1:/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set5/matchpy1/checkpoints/30-50
+Testing...
+Test Loss:   0.37, Test Acc:  75.38%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8394    0.9438    0.8885       587
+          1     0.8390    0.6187    0.7122       278
+
+avg / total     0.8393    0.8393    0.8319       865
+
+Confusion Matrix...
+[[554  33]
+ [106 172]]
+Time usage: 0:00:01
+
+
 
 
 
