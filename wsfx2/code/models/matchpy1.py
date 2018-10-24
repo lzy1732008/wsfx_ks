@@ -55,23 +55,34 @@ class MatchPy():
         # convolution
         self.w1 = tf.get_variable('w1',
                                   initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.2, dtype=tf.float32),
-                                  dtype=tf.float32, shape=[2, 10, 1, 8])
+                                  dtype=tf.float32, shape=[5, 5, 1, 8])
         self.b1 = tf.get_variable('b1', initializer=tf.constant_initializer(), dtype=tf.float32, shape=[8])
         # batch_size * X1_maxlen * X2_maxlen * feat_out
         self.conv1 = tf.nn.relu(tf.nn.conv2d(self.cross_img, self.w1, [1, 1, 1, 1], "SAME") + self.b1)
-        print('conv1.shape:'+str(self.conv1.shape))
-        print('dpool_index.shape:'+str(self.dpool_index.shape))
 
         # dynamic pooling
         self.conv1_expand = tf.gather_nd(self.conv1, self.dpool_index)
         self.pool1 = tf.nn.max_pool(self.conv1_expand,
-                                    [1, self.config.data1_maxlen / self.config.data1_psize,
-                                     self.config.data2_maxlen / self.config.data2_psize, 1],
-                                    [1, self.config.data1_maxlen / self.config.data1_psize,
-                                     self.config.data2_maxlen / self.config.data2_psize, 1], "VALID")
+                                    [1, self.config.data1_psize,
+                                     self.config.data2_psize, 1],
+                                    [1,  self.config.data1_psize,
+                                      self.config.data2_psize, 1], "VALID")#[?,3,5,8]
+
+        self.w2 = tf.get_variable('w2',
+                                  initializer=tf.truncated_normal_initializer(mean=0.0, stddev=0.2,dtype=tf.float32),
+                                  dtype=tf.float32,shape=[3,3,8,16])
+        self.b2 = tf.get_variable('b2', initializer=tf.constant_initializer(), dtype=tf.float32, shape=[16])
+        self.conv2 = tf.nn.relu(tf.nn.conv2d(input=self.pool1,filter=self.w2,strides=[1,1,1,1],padding='SAME') + self.b2)
+        self.pool2 = tf.nn.max_pool(self.conv2,
+                                    [1, self.config.data1_psize,
+                                    self.config.data2_psize, 1],
+                                    [1, self.config.data1_psize,
+                                     self.config.data2_psize, 1], "VALID"
+                                    )
 
         with tf.variable_scope('fc'):
-            fc1 = tf.layers.dense(inputs=tf.reshape(self.pool1, [self.batch_size, self.config.data1_psize * self.config.data2_psize * 8]),
+            fc1 = tf.layers.dense(inputs=tf.reshape(self.pool2,
+                                                    [self.batch_size,3*2*16]),
                                        units=20,use_bias=True,trainable=True,name="fc1")
             fc1_ = tf.contrib.layers.dropout(fc1, self.keep_prob)
             fc = tf.nn.relu(fc1_)
