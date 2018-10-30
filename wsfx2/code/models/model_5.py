@@ -56,20 +56,32 @@ class CNN(object):
     '''
     def gate(self, ks, inputx):
         with tf.name_scope("gate"):
-            weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+            weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, self.config.FACT_LEN],
                                                     stddev=0, seed=1),trainable=True, name='w1')
-            weight_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+            weight_2 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.FACT_LEN],
                                                     stddev=0, seed=2),trainable=True, name='w2')
-            weight_3 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+            weight_3 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.FACT_LEN],
                                                    stddev=0, seed=3), trainable=True, name='w3')
             weight_4 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
                                                    stddev=0, seed=4), trainable=True, name='w4')
 
 
-            k_1, k_2, k_3 = ks[:,0,:], ks[:,1,:], ks[:,2,:] #[None,l,d]
-            ksw_1 = tf.sigmoid(tf.einsum('abc,cd,adf->abf',inputx, weight_1,k_1)) #[batch,l,d]
-            ksw_2 = tf.sigmoid(tf.einsum('abc,cd,adf->abf',inputx,weight_2,tf.concat([k_2,ksw_1],axis=2)))#[batch,l,d]
-            ksw_3 = tf.sigmoid(tf.einsum('abc,cd,adf->abf',inputx,weight_3,tf.concat([k_3,ksw_2],axis=2))) #[batch,l,d]
+            k_1_init, k_2_init, k_3_init = ks[:,0,:], ks[:,1,:], ks[:,2,:] #[None,d]
+            k_1 = tf.reshape(tf.keras.backend.repeat_elements(k_1_init,rep=self.config.FACT_LEN,axis=1),
+                                shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
+            k_2 = tf.reshape(tf.keras.backend.repeat_elements(k_2_init, rep=self.config.FACT_LEN, axis=1),
+                             shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
+            k_3 = tf.reshape(tf.keras.backend.repeat_elements(k_3_init, rep=self.config.FACT_LEN, axis=1),
+                             shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
+            print('inputx.shape:',inputx.shape)
+            fun1 = tf.einsum('abc,cd->abd', k_1, weight_1)
+            ksw_1 = tf.sigmoid(tf.einsum('abd,adf->abf',fun1,inputx)) #[batch,l,d]
+
+            fun2 = tf.einsum('abc,cd->abd', tf.concat([k_2,ksw_1],axis=2), weight_2)
+            ksw_2 = tf.sigmoid(tf.einsum('abd,adf->abf',fun2,inputx))#[batch,l,d]
+
+            fun3 = tf.einsum('abc,cd->abd', tf.concat([k_3,ksw_2],axis=2), weight_3)
+            ksw_3 = tf.sigmoid(tf.einsum('abd,adf->abf',fun3,inputx)) #[batch,l,d]
 
 
             ksw_concat = tf.concat([ksw_1,ksw_2,ksw_3],axis=2) #[None,l,3*d]
@@ -77,12 +89,17 @@ class CNN(object):
             ksw_sum = tf.reduce_sum(ksw_concat,axis=2) #[None,l,1,d]
             one = 4 * tf.ones(shape=tf.shape(ksw_sum)) #[None,l,1,d]
             p_x = one-ksw_sum #[None,l,1,d]
+            p_x = tf.expand_dims(p_x,axis=2)
+            inputx_epd = tf.expand_dims(inputx,axis=2)
 
-            ks_p_mul = tf.keras.backend.repeat_elements(tf.concat([ks,ksw_concat],axis=2),rep=self.config.FACT_LEN,axis=1)#[None,l,3,2d]
-            M = tf.concat([ks_p_mul,tf.concat([inputx,p_x],axis=2)],axis=2) #[None,l,4,2d]
+
+            ks_epd = tf.reshape(tf.keras.backend.repeat_elements(ks,rep=self.config.FACT_LEN,axis=1),
+                                shape=[-1,self.config.FACT_LEN,self.config.KS_LEN, self.config.EMBDDING_DIM]) #[None,l,3,d]
+            ks_p_mul = tf.concat([ks_epd,ksw_concat],axis=3)#[None,l,3,2d]
+            M = tf.concat([ks_p_mul,tf.concat([inputx_epd,p_x],axis=3)],axis=2) #[None,l,4,2d]
             pw = tf.sigmoid(tf.einsum('abcd,df->abcf',M,weight_4)) #[None,l,4,d]
 
-            kw_input = tf.concat([tf.expand_dims(ks,axis=2),inputx],axis=2) #[None,l,4,d]
+            kw_input = tf.concat([ks_epd,inputx_epd],axis=2) #[None,l,4,d]
             temp1 = tf.reduce_sum(pw * kw_input,axis=2)#[None,l,1,d]
             new_vector = tf.reshape(temp1,shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
         return new_vector

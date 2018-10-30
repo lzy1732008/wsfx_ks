@@ -11,7 +11,7 @@ import tensorflow as tf
 from sklearn import metrics
 import tensorflow.contrib.keras as kr
 
-from wsfx2.code.models.model_4 import modelConfig, CNN
+from wsfx2.code.models.model_5 import modelConfig, CNN
 from wsfx2.code.train.loader import batch_iter,data_load,data_ngram
 
 data_dir = '../../source/dataset/set_4'
@@ -22,9 +22,9 @@ t_f = open(trainpath,'r',encoding='utf-8')
 v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 3 #kw level
-n_number = 15 #n-gram
+n_number = 2 #n-gram
 
-save_dir  = '../../result/set4/model4'  #修改处
+save_dir  = '../../result/set4/model5'  #修改处
 save_path = save_dir+'/checkpoints/30-30-'+str(n_number)+'gram/best_validation'  # 最佳验证结果保存路径
 tensorboard_dir = save_dir+'/tensorboard/30-30-'+str(n_number)+'gram/'  #修改处
 if not os.path.exists(save_path):
