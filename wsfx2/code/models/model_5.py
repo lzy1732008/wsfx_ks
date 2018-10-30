@@ -41,11 +41,36 @@ class CNN(object):
         return
 
     def cnn(self):
-        new_x1 = self.gate(self.input_ks,self.input_x1)
+        new_x1 = self.gate2(self.input_ks,self.input_x1)
         op1,op2 = self.conv(new_x1,self.input_x2)
         self.match(op1,op2)
 
-
+    '''
+    门机制2：
+    采用三个不同的weight计算层来计算在各个层级的概率，将并将各个层级的三种概率取平均值，得到平均概率
+    '''
+    def gate2(self,ks,inputx):
+        with tf.name_scope("gate"):
+            weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+                                                    stddev=0, seed=1), trainable=True, name='w1')
+            weight_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+                                                    stddev=0, seed=2), trainable=True, name='w2')
+            weight_3 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+                                                    stddev=0, seed=3), trainable=True, name='w3')
+            ks_epd = tf.reshape(tf.keras.backend.repeat_elements(ks,rep=self.config.FACT_LEN,axis=1),
+                                shape = [-1, self.config.FACT_LEN,self.config.KS_LEN, self.config.EMBDDING_DIM])
+            inputx_epd = tf.expand_dims(inputx,axis=2)
+            ks_input = tf.concat([ks_epd,inputx_epd],axis=2) #[None,l,4,d]
+            s1 = tf.sigmoid(tf.einsum('abcd,abdf->abcf', tf.einsum('abcd,df>abcf', ks_input, weight_1), inputx_epd))  #[None,l,4,d]
+            s2 = tf.sigmoid(tf.einsum('abcd,abdf->abcf', tf.einsum('abcd,df>abcf', ks_input, weight_2), inputx_epd))  # [None,l,4,d]
+            s3 = tf.sigmoid(tf.einsum('abcd,abdf->abcf', tf.einsum('abcd,df>abcf', ks_input, weight_3), inputx_epd))  # [None,l,4,d]
+            s1_epd = tf.expand_dims(s1,axis=4)
+            s2_epd = tf.expand_dims(s2, axis=4)
+            s3_epd = tf.expand_dims(s3, axis=4)
+            pw = tf.sigmoid(tf.reduce_mean(tf.concat([s1_epd,s2_epd,s3_epd],axis=4),axis=4)) #[None,l,4,d,3]->[None,l,4,d]
+            new_vector1 = tf.reduce_sum(ks_input * pw)
+            new_vector = tf.reshape(new_vector1, shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
+            return new_vector
 
 
     '''
