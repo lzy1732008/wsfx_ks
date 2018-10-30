@@ -41,7 +41,7 @@ class CNN(object):
         return
 
     def cnn(self):
-        new_x1 = self.gate2(self.input_ks,self.input_x1)
+        new_x1 = self.gate3(self.input_ks,self.input_x1)
         op1,op2 = self.conv(new_x1,self.input_x2)
         self.match(op1,op2)
 
@@ -71,6 +71,14 @@ class CNN(object):
             new_vector1 = tf.reduce_sum(ks_input * pw, axis=2) #[None,l,d]
             new_vector = tf.reshape(new_vector1, shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
             return new_vector
+    '''
+    这个门机制是基于gate1的改进（鉴于gate2的差效果。。）:
+    s1 = tf.sigmoid(tf.relu(x * w * k_1)) 计算得到关于这个先验知识哪些dim应该被保留
+    s2 = tf.sigmoid(tf.relu(x * w * [k_2;s1]))
+    s3 = tf.sigmoid(tf.relu(x * w * [k_3;s2]))
+    new_vector = s1 * x + s2 * x + s3 * x
+    
+    '''
     def get3(self,ks,inputx):
         with tf.name_scope("gate"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, self.config.FACT_LEN],
@@ -79,9 +87,6 @@ class CNN(object):
                                                     stddev=0, seed=2),trainable=True, name='w2')
             weight_3 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.FACT_LEN],
                                                    stddev=0, seed=3), trainable=True, name='w3')
-            weight_4 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
-                                                   stddev=0, seed=4), trainable=True, name='w4')
-
 
             k_1_init, k_2_init, k_3_init = ks[:,0,:], ks[:,1,:], ks[:,2,:] #[None,d]
             k_1 = tf.reshape(tf.keras.backend.repeat_elements(k_1_init,rep=self.config.FACT_LEN,axis=1),
@@ -92,33 +97,16 @@ class CNN(object):
                              shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
             print('inputx.shape:',inputx.shape)
             fun1 = tf.einsum('abc,cd->abd', k_1, weight_1)
-            ksw_1 = tf.sigmoid(tf.einsum('abd,adf->abf',fun1,inputx)) #[batch,l,d]
+            ksw_1 = tf.sigmoid(tf.nn.relu(tf.einsum('abd,adf->abf',fun1,inputx))) #[batch,l,d]
 
             fun2 = tf.einsum('abc,cd->abd', tf.concat([k_2,ksw_1],axis=2), weight_2)
-            ksw_2 = tf.sigmoid(tf.einsum('abd,adf->abf',fun2,inputx))#[batch,l,d]
+            ksw_2 = tf.sigmoid(tf.nn.relu(tf.einsum('abd,adf->abf',fun2,inputx)))#[batch,l,d]
 
             fun3 = tf.einsum('abc,cd->abd', tf.concat([k_3,ksw_2],axis=2), weight_3)
-            ksw_3 = tf.sigmoid(tf.einsum('abd,adf->abf',fun3,inputx)) #[batch,l,d]
+            ksw_3 = tf.sigmoid(tf.nn.relu(tf.einsum('abd,adf->abf',fun3,inputx))) #[batch,l,d]
 
+            new_vector = (ksw_1 + ksw_2 + ksw_3) * inputx
 
-            ksw_concat = tf.concat([ksw_1,ksw_2,ksw_3],axis=2) #[None,l,3*d]
-            ksw_concat = tf.reshape(ksw_concat,shape=[-1,self.config.FACT_LEN,3,self.config.EMBDDING_DIM])#[None,l,3,d]
-            ksw_sum = tf.reduce_sum(ksw_concat,axis=2) #[None,l,1,d]
-            one = 4 * tf.ones(shape=tf.shape(ksw_sum)) #[None,l,1,d]
-            p_x = one-ksw_sum #[None,l,1,d]
-            p_x = tf.expand_dims(p_x,axis=2)
-            inputx_epd = tf.expand_dims(inputx,axis=2)
-
-
-            ks_epd = tf.reshape(tf.keras.backend.repeat_elements(ks,rep=self.config.FACT_LEN,axis=1),
-                                shape=[-1,self.config.FACT_LEN,self.config.KS_LEN, self.config.EMBDDING_DIM]) #[None,l,3,d]
-            ks_p_mul = tf.concat([ks_epd,ksw_concat],axis=3)#[None,l,3,2d]
-            M = tf.concat([ks_p_mul,tf.concat([inputx_epd,p_x],axis=3)],axis=2) #[None,l,4,2d]
-            pw = tf.sigmoid(tf.einsum('abcd,df->abcf',M,weight_4)) #[None,l,4,d]
-
-            kw_input = tf.concat([ks_epd,inputx_epd],axis=2) #[None,l,4,d]
-            temp1 = tf.reduce_sum(pw * kw_input,axis=2)#[None,l,1,d]
-            new_vector = tf.reshape(temp1,shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
         return new_vector
 
 

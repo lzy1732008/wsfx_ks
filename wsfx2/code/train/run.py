@@ -23,7 +23,7 @@ v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 3 #kw level
 n_number = 2 #n-gram
-gate_n = 2
+gate_n = 3
 
 save_dir  = '../../result/set4/model5'  #修改处
 save_path = save_dir+'/checkpoints/30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'/best_validation'  # 最佳验证结果保存路径
@@ -216,5 +216,5 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-# train()
-test()
+train()
+# test()
