@@ -360,6 +360,23 @@ Confusion Matrix...
  [ 64 214]]
 Time usage: 0:00:17
 
+model5+set4:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/30-30-2gram-gate2
+Testing...
+Test Loss:    0.3, Test Acc:  75.26%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.9002    0.8545    0.8767       591
+          1     0.7208    0.7986    0.7577       278
+
+avg / total     0.8428    0.8366    0.8386       869
+
+Confusion Matrix...
+[[505  86]
+ [ 56 222]]
+Time usage: 0:00:05
+
 
 
 
