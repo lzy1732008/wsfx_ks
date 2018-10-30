@@ -45,6 +45,9 @@ class CNN(object):
         op1,op2 = self.conv(new_x1,self.input_x2)
         self.match(op1,op2)
 
+
+
+
     '''
  这个门机制如下：采用的是上一级得到的相似概率si会传递到下一级，然后再对s和ks以及inputx输入MLP中计算得出分配在每个的概率，然后用这个概率计算new_vector
  s1 = x * w * k_1
