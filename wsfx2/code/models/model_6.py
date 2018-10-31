@@ -1,4 +1,4 @@
-#添加多级先验知识,gate is differ from model_3.py
+#添加多级先验知识,match is differ from model_4.py
 
 #基于CNN，只使用最精细的那个先验知识，conv1d
 
@@ -12,8 +12,11 @@ class modelConfig(object):
         self.LAW_LEN = 30
         self.KS_LEN= 3
 
+        self.FILTERS = [3, 3, 1, 3]
+        self.OUTPUTDIM = 3
         self.FILTERS = 256
         self.KERNEL_SIZE = 5  # 卷积核尺寸
+
 
         self.LAYER_UNITS = 100
         self.NUM_CLASS = 2
@@ -44,9 +47,10 @@ class CNN(object):
         return
 
     def cnn(self):
-        new_x1 = self.gate(self.input_ks,self.input_x1)
-        op1,op2 = self.conv(new_x1,self.input_x2)
-        self.match(op1,op2)
+        new_x1,pw = self.gate(self.input_ks,self.input_x1)
+        value = self.match2(new_x1,self.input_x2,pw)
+        # max_result = tf.reshape(value, shape=[-1, self.config.K * self.config.FACT_LEN])
+        self.lastlayer(value)
 
 
 
@@ -76,20 +80,40 @@ class CNN(object):
 
         return new_vector,pw
 
+    def match2(self,inputx,inputy,pw):
+        with tf.name_scope("match"):
+            conv1 = tf.layers.conv1d(inputx, filters=self.config.FILTERS, kernel_size=self.config.KERNEL_SIZE,
+                                     name='conv1')
+            op1 = tf.reduce_max(conv1, reduction_indices=[1], name='gmp1') #[None,256]
 
-    def match(self,inpux,inputy):
+            conv2 = tf.layers.conv1d(inputy, filters=self.config.FILTERS, kernel_size=self.config.KERNEL_SIZE,
+                                     name='conv2')
+            op2 = tf.reduce_max(conv2, reduction_indices=[1], name='gmp2') #[none,256]
+            op2_epd = tf.expand_dims(op2,axis=2)#[none,256,1]
+            pw_ks = tf.reduce_mean(tf.nn.relu(pw), axis=3) #[None,30,4,1]
+            pw_ks_re = tf.reshape(pw_ks, shape=[-1, self.config.FACT_LEN, self.config.KS_LEN+1]) #[None.30,4]
+            new_op2 = tf.concat([op2_epd,pw_ks_re],axis=2) #[None,30,5]
+            new_op2_re = tf.reshape(new_op2,shape=[-1,self.config.FACT_LEN * (self.config.KS_LEN+2)])
+            return tf.concat([op1,new_op2_re],axis=1)
+
+    def match1(self,inpux,inputy):
         with tf.name_scope("match"):
             matrix_inter = tf.matmul(inpux,inputy,transpose_b=True) #[None,30,30]
-            value,index = tf.nn.top_k(matrix_inter,k=self.config.K,sorted=False) #[None,30,K]
 
+            inputx1 = tf.expand_dims(input=matrix_inter, axis=3)
+            filter_1 = tf.Variable(tf.truncated_normal(self.config.FILTERS, stddev=0.5))
+            t1 = tf.nn.conv2d(input=inputx1, filter=filter_1, strides=[1, 1, 1, 1], padding='SAME') #[None,30,30,3]
+            new_t1 = tf.reshape(t1,shape=[-1,self.config.FACT_LEN,self.config.OUTPUTDIM,self.config.LAW_LEN]) #[None,30,3,30]
+            value,index = tf.nn.top_k(new_t1,k=self.config.K,sorted=False) #[None,30,3,K]
+            value = tf.reshape(value,shape=[-1,self.config.FACT_LEN,self.config.OUTPUTDIM * self.config.K]) #[None,30,3*k]
             return value
 
     def addks(self,value,pw):
         with tf.name_scope("addks"):
             pw_ks = tf.reduce_mean(tf.nn.relu(pw[:,:,:3,:]),axis=3) #[None,30,3,1]
             pw_ks_re = tf.reshape(pw_ks,shape=[-1,self.config.FACT_LEN,self.config.KS_LEN]) #[None,30,3]
-            new_max_result = tf.concat([value,pw_ks_re],axis=2) #[None,30,K=3]
-            max_result = tf.reshape(new_max_result, shape=[-1, (self.config.K+3) * self.config.FACT_LEN])
+            new_max_result = tf.concat([value,pw_ks_re],axis=2) #[None,30,3*K+3]
+            max_result = tf.reshape(new_max_result, shape=[-1, (self.config.OUTPUTDIM * self.config.K+3) * self.config.FACT_LEN])
             return max_result
 
     def lastlayer(self,max_result):
