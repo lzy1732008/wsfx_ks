@@ -79,10 +79,10 @@ class CNN(object):
     def conv(self,inputx,inputy):
         with tf.name_scope("conv"):
             conv1 = tf.layers.conv1d(inputx,filters=self.config.FILTERS,kernel_size=self.config.KERNEL_SIZE,name='conv1')
-            op1 = tf.reduce_max(conv1, reduction_indices=[1], name='gmp1')
+            op1 = tf.reduce_max(conv1, reduction_indices=[1], name='gmp1') #[None,256]
 
             conv2 = tf.layers.conv1d(inputy,filters=self.config.FILTERS,kernel_size=self.config.KERNEL_SIZE,name='conv2')
-            op2 = tf.reduce_max(conv2, reduction_indices=[1], name='gmp2')
+            op2 = tf.reduce_max(conv2, reduction_indices=[1], name='gmp2') #[None,256]
 
             return op1,op2
 

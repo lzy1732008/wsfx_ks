@@ -43,8 +43,9 @@ class CNN(object):
 
 
     def cnn(self):
-        new_x1 = self.gate4(self.input_ks,self.input_x1)
-        op1,op2 = self.conv(new_x1,self.input_x2)
+        new_x1,pwls = self.gate3(self.input_ks,self.input_x1)
+        new_x1_2 = self.addks(new_x1,pwls)
+        op1,op2 = self.cnn(new_x1_2,self.input_x2)
         self.match(op1,op2)
 
     '''
@@ -109,10 +110,17 @@ class CNN(object):
 
             new_vector = (ksw_1 + ksw_2 + ksw_3) * inputx
 
-        return new_vector
+            ksw_1_epd = tf.expand_dims(ksw_1, axis=2)
+            ksw_2_epd = tf.expand_dims(ksw_2, axis=2)
+            ksw_3_epd = tf.expand_dims(ksw_3, axis=2)
 
+        return new_vector,tf.concat([ksw_1_epd,ksw_2_epd,ksw_3_epd],axis=2)
 
-
+    def addks(self,inputx,ksw): #inputx:[None,l,d]  ksw:[None,l,3,d]
+        inputx_epd = tf.expand_dims(inputx,axis=2)
+        inputx_ks = tf.concat([inputx_epd,ksw],axis=2) #[None,l,4,d]
+        inputx_ks_resh = tf.reshape(inputx_ks,shape=[-1,self.config.FACT_LEN,(self.config.KS_LEN+1)*self.config.EMBDDING_DIM])
+        return inputx_ks_resh
     '''
     这个门机制是基于gate3的改进:
     s1 = tf.sigmoid(tf.relu(x * w + k_1 * w)) 计算得到关于这个先验知识哪些dim应该被保留
@@ -243,7 +251,7 @@ class CNN(object):
     def match(self,op1,op2):
         with tf.name_scope("match"):
 
-            h = tf.concat([op1,op2],axis=1) #[batch,len1+len2]
+            h = tf.concat([op1,op2],axis=1) #[batch,FILTERS*2]
             fc = tf.layers.dense(inputs=h, units= self.config.LAYER_UNITS, use_bias=True,
                             trainable=True, name="fc1")
             fc = tf.contrib.layers.dropout(fc, self.keep_prob)  # 根据比例keep_prob输出输入数据，最终返回一个张量
