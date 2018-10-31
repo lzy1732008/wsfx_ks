@@ -41,7 +41,7 @@ class CNN(object):
         return
 
     def cnn(self):
-        new_x1 = self.gate3(self.input_ks,self.input_x1)
+        new_x1 = self.gate4(self.input_ks,self.input_x1)
         op1,op2 = self.conv(new_x1,self.input_x2)
         self.match(op1,op2)
 
@@ -125,11 +125,11 @@ class CNN(object):
                                                       stddev=0, seed=2), trainable=True, name='w12')
             weight_2_1 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
                                                       stddev=0, seed=3), trainable=True, name='w21')
-            weight_2_2 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
+            weight_2_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
                                                       stddev=0, seed=4), trainable=True, name='w22')
             weight_3_1 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
                                                       stddev=0, seed=5), trainable=True, name='w31')
-            weight_3_2 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
+            weight_3_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
                                                       stddev=0, seed=6), trainable=True, name='w32')
 
 
