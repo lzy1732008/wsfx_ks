@@ -82,19 +82,19 @@ class CNN(object):
     def gate3(self,ks,inputx):
         with tf.name_scope("gate"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, self.config.FACT_LEN],
-                                                    stddev=0, seed=1),trainable=True, name='w1')
+                                                    stddev=0, seed=1), trainable=True, name='w1')
             weight_2 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.FACT_LEN],
-                                                    stddev=0, seed=2),trainable=True, name='w2')
+                                                    stddev=0, seed=2), trainable=True, name='w2')
             weight_3 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.FACT_LEN],
-                                                   stddev=0, seed=3), trainable=True, name='w3')
+                                                    stddev=0, seed=3), trainable=True, name='w3')
 
             k_1_init, k_2_init, k_3_init = ks[:,0,:], ks[:,1,:], ks[:,2,:] #[None,d]
             k_1 = tf.reshape(tf.keras.backend.repeat_elements(k_1_init,rep=self.config.FACT_LEN,axis=1),
-                                shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
+                                shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
             k_2 = tf.reshape(tf.keras.backend.repeat_elements(k_2_init, rep=self.config.FACT_LEN, axis=1),
-                             shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
+                                shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
             k_3 = tf.reshape(tf.keras.backend.repeat_elements(k_3_init, rep=self.config.FACT_LEN, axis=1),
-                             shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
+                                shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
             print('inputx.shape:',inputx.shape)
             fun1 = tf.einsum('abc,cd->abd', k_1, weight_1)
             ksw_1 = tf.sigmoid(tf.nn.relu(tf.einsum('abd,adf->abf',fun1,inputx))) #[batch,l,d]
@@ -106,6 +106,54 @@ class CNN(object):
             ksw_3 = tf.sigmoid(tf.nn.relu(tf.einsum('abd,adf->abf',fun3,inputx))) #[batch,l,d]
 
             new_vector = (ksw_1 + ksw_2 + ksw_3) * inputx
+
+        return new_vector
+
+    '''
+    这个门机制是基于gate3的改进:
+    s1 = tf.sigmoid(tf.relu(x * w + k_1 * w)) 计算得到关于这个先验知识哪些dim应该被保留
+    s2 = tf.sigmoid(tf.relu(x * w + [k_2;s1] * w))
+    s3 = tf.sigmoid(tf.relu(x * w + [k_3;s2] * w))
+    new_vector = s1 * x + s2 * x + s3 * x
+    '''
+
+    def gate4(self,ks,inputx):
+        with tf.name_scope("gate"):
+            weight_1_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
+                                                      stddev=0, seed=1), trainable=True, name='w11')
+            weight_1_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
+                                                      stddev=0, seed=2), trainable=True, name='w12')
+            weight_2_1 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
+                                                      stddev=0, seed=3), trainable=True, name='w21')
+            weight_2_2 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
+                                                      stddev=0, seed=4), trainable=True, name='w22')
+            weight_3_1 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
+                                                      stddev=0, seed=5), trainable=True, name='w31')
+            weight_3_2 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
+                                                      stddev=0, seed=6), trainable=True, name='w32')
+
+
+            k_1_init, k_2_init, k_3_init = ks[:,0,:], ks[:,1,:], ks[:,2,:] #[None,d]
+            k_1 = tf.reshape(tf.keras.backend.repeat_elements(k_1_init,rep=self.config.FACT_LEN, axis=1),
+                                shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
+            k_2 = tf.reshape(tf.keras.backend.repeat_elements(k_2_init, rep=self.config.FACT_LEN, axis=1),
+                                shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
+            k_3 = tf.reshape(tf.keras.backend.repeat_elements(k_3_init, rep=self.config.FACT_LEN, axis=1),
+                                shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
+            print('inputx.shape:',inputx.shape)
+            fun11 = tf.einsum('abc,cd->abd', k_1, weight_1_1)
+            fun12 = tf.einsum('abc,cd->abd', inputx, weight_1_2)
+            fun1 = tf.sigmoid(tf.nn.relu(fun11 + fun12))
+
+            fun21 = tf.einsum('abc,cd->abd', tf.concat([k_2,fun1],axis=2), weight_2_1)
+            fun22 = tf.einsum('abc,cd->abd', inputx, weight_2_2)
+            fun2 = tf.sigmoid(tf.nn.relu(fun21 + fun22))
+
+            fun31 = tf.einsum('abc,cd->abd', tf.concat([k_3, fun2], axis=2), weight_3_1)
+            fun32 = tf.einsum('abc,cd->abd', inputx, weight_3_2)
+            fun3 = tf.sigmoid(tf.nn.relu(fun31 + fun32))
+
+            new_vector = (fun1 + fun2 + fun3) * inputx
 
         return new_vector
 
