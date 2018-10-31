@@ -72,6 +72,7 @@ class CNN(object):
         return new_vector
 
 
+
     def conv(self,inputx,inputy):
         with tf.name_scope("conv"):
             conv1 = tf.layers.conv1d(inputx,filters=self.config.FILTERS,kernel_size=self.config.KERNEL_SIZE,name='conv1')

@@ -377,6 +377,90 @@ Confusion Matrix...
  [ 56 222]]
 Time usage: 0:00:05
 
+model5+set4:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/30-30-2gram-gate3
+Testing...
+Test Loss:   0.26, Test Acc:  78.25%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8838    0.9137    0.8985       591
+          1     0.8023    0.7446    0.7724       278
+
+avg / total     0.8577    0.8596    0.8582       869
+
+Confusion Matrix...
+[[540  51]
+ [ 71 207]]
+Time usage: 0:00:16
+
+model5+set4:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/30-30-8gram-gate3
+Testing...
+Test Loss:   0.25, Test Acc:  77.22%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8773    0.9069    0.8918       591
+          1     0.7868    0.7302    0.7575       278
+
+avg / total     0.8483    0.8504    0.8489       869
+
+Confusion Matrix...
+[[536  55]
+ [ 75 203]]
+Time usage: 0:00:16
+
+model5+set4:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/30-30-1gram-gate3
+Testing...
+Test Loss:   0.37, Test Acc:  77.91%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8851    0.9120    0.8983       591
+          1     0.8000    0.7482    0.7732       278
+
+avg / total     0.8578    0.8596    0.8583       869
+
+Confusion Matrix...
+[[539  52]
+ [ 70 208]]
+Time usage: 0:00:17
+
+model5+set4:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/30-30-3gram-gate3
+Testing...
+Test Loss:   0.26, Test Acc:  78.37%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8867    0.9137    0.9000       591
+          1     0.8038    0.7518    0.7770       278
+
+avg / total     0.8602    0.8619    0.8606       869
+
+Confusion Matrix...
+[[540  51]
+ [ 69 209]]
+Time usage: 0:00:16
+
+model5+se4:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/30-30-10gram-gate3
+Testing...
+Test Loss:    0.3, Test Acc:  78.71%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8967    0.9103    0.9034       591
+          1     0.8030    0.7770    0.7898       278
+
+avg / total     0.8667    0.8677    0.8671       869
+
+Confusion Matrix...
+[[538  53]
+ [ 62 216]]
+Time usage: 0:00:16
 
 
 

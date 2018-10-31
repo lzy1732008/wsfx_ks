@@ -79,7 +79,7 @@ class CNN(object):
     new_vector = s1 * x + s2 * x + s3 * x
     
     '''
-    def get3(self,ks,inputx):
+    def gate3(self,ks,inputx):
         with tf.name_scope("gate"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, self.config.FACT_LEN],
                                                     stddev=0, seed=1),trainable=True, name='w1')
