@@ -25,6 +25,8 @@ class modelConfig(object):
         self.print_per_batch = 10
         self.dropout_keep_prob = 0.5
 
+        self.K = 5
+
 class CNN(object):
     def __init__(self, config):
         self.config = config
@@ -48,7 +50,7 @@ class CNN(object):
 
 
 
-    def gate(self, ks, inputx):#pw = sigmoid([ks;e]*w*e)->[4,d]代表各个的概率,new_vector = pw[0] * ks[0] + pw[1] * ks[1] + pw[2] * ks[2] + pw[3] * e
+    def gate(self, ks, inputx):#pw = sigmoid([ks*w;x*w])->[4,d]代表各个的概率,new_vector = pw[0] * ks[0] + pw[1] * ks[1] + pw[2] * ks[2] + pw[3] * e
         with tf.name_scope("gate"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM,self.config.EMBDDING_DIM],
                                                     stddev=0, seed=1),trainable=True, name='w1')
@@ -72,25 +74,27 @@ class CNN(object):
             new_vector1 = tf.reduce_sum(temp1 * pw, axis=2) #[None, l, 1, d]
             new_vector = tf.reshape(new_vector1, shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
 
-        return new_vector
+        return new_vector,pw
 
 
-
-    def conv(self,inputx,inputy):
-        with tf.name_scope("conv"):
-            conv1 = tf.layers.conv1d(inputx,filters=self.config.FILTERS,kernel_size=self.config.KERNEL_SIZE,name='conv1')
-            op1 = tf.reduce_max(conv1, reduction_indices=[1], name='gmp1')
-
-            conv2 = tf.layers.conv1d(inputy,filters=self.config.FILTERS,kernel_size=self.config.KERNEL_SIZE,name='conv2')
-            op2 = tf.reduce_max(conv2, reduction_indices=[1], name='gmp2')
-
-            return op1,op2
-
-    def match(self,op1,op2):
+    def match(self,inpux,inputy):
         with tf.name_scope("match"):
+            matrix_inter = tf.matmul(inpux,inputy,transpose_b=True) #[None,30,30]
+            value,index = tf.nn.top_k(matrix_inter,k=self.config.K,sorted=False) #[None,30,K]
 
-            h = tf.concat([op1,op2],axis=1) #[batch,len1+len2]
-            fc = tf.layers.dense(inputs=h, units= self.config.LAYER_UNITS, use_bias=True,
+            return value
+
+    def addks(self,value,pw):
+        with tf.name_scope("addks"):
+            pw_ks = tf.reduce_mean(tf.nn.relu(pw[:,:,:3,:]),axis=3) #[None,30,3,1]
+            pw_ks_re = tf.reshape(pw_ks,shape=[-1,self.config.FACT_LEN,self.config.KS_LEN]) #[None,30,3]
+            new_max_result = tf.concat([value,pw_ks_re],axis=2) #[None,30,K=3]
+            max_result = tf.reshape(new_max_result, shape=[-1, (self.config.K+3) * self.config.FACT_LEN])
+            return max_result
+
+    def lastlayer(self,max_result):
+        with tf.name_scope("MLP"):
+            fc = tf.layers.dense(inputs=max_result, units= self.config.LAYER_UNITS, use_bias=True,
                             trainable=True, name="fc1")
             fc = tf.contrib.layers.dropout(fc, self.keep_prob)  # 根据比例keep_prob输出输入数据，最终返回一个张量
             fc = tf.nn.relu(fc)  # 激活函数，此时fc的维度是hidden_dim
