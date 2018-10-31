@@ -497,6 +497,77 @@ Confusion Matrix...
  [ 74 204]]
 Time usage: 0:00:16
 
+model5+SET4:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/30-30-1gram-gate4-True
+Testing...
+Test Loss:   0.25, Test Acc:  77.68%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8744    0.9188    0.8960       591
+          1     0.8065    0.7194    0.7605       278
+
+avg / total     0.8527    0.8550    0.8527       869
+
+Confusion Matrix...
+[[543  48]
+ [ 78 200]]
+Time usage: 0:00:16
+
+model5+set4:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/30-30-1gram-gate8-True
+Testing...
+Test Loss:    0.3, Test Acc:  77.79%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8947    0.8917    0.8932       591
+          1     0.7714    0.7770    0.7742       278
+
+avg / total     0.8553    0.8550    0.8551       869
+
+Confusion Matrix...
+[[527  64]
+ [ 62 216]]
+Time usage: 0:00:17
+
+
+model5+set4:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/30-30-1gram-gate10-True
+Testing...
+Test Loss:   0.28, Test Acc:  77.45%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8740    0.9154    0.8942       591
+          1     0.8000    0.7194    0.7576       278
+
+avg / total     0.8503    0.8527    0.8505       869
+
+Confusion Matrix...
+[[541  50]
+ [ 78 200]]
+Time usage: 0:00:16
+
+
+model5+set4:
+/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/30-30-3gram-gate10-True
+Testing...
+Test Loss:   0.27, Test Acc:  78.02%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8840    0.9154    0.8994       591
+          1     0.8054    0.7446    0.7738       278
+
+avg / total     0.8589    0.8608    0.8592       869
+
+Confusion Matrix...
+[[541  50]
+ [ 71 207]]
+Time usage: 0:00:16
+tensorboard.exe --logdir='/home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/30-30-1gram-gate4'
+
 
 
 
