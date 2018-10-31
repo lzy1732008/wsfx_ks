@@ -23,6 +23,7 @@ class modelConfig(object):
         self.save_per_batch = 10
         self.print_per_batch = 10
         self.dropout_keep_prob = 0.5
+        self.lamda = 0.1
 
 class CNN(object):
     def __init__(self, config):
@@ -39,6 +40,7 @@ class CNN(object):
 
         self.cnn()
         return
+
 
     def cnn(self):
         new_x1 = self.gate4(self.input_ks,self.input_x1)
@@ -109,6 +111,8 @@ class CNN(object):
 
         return new_vector
 
+
+
     '''
     这个门机制是基于gate3的改进:
     s1 = tf.sigmoid(tf.relu(x * w + k_1 * w)) 计算得到关于这个先验知识哪些dim应该被保留
@@ -132,6 +136,12 @@ class CNN(object):
             weight_3_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
                                                       stddev=0, seed=6), trainable=True, name='w32')
 
+            tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_1_1)
+            tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_1_2)
+            tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_2_1)
+            tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_2_2)
+            tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_3_1)
+            tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_3_2)
 
             k_1_init, k_2_init, k_3_init = ks[:,0,:], ks[:,1,:], ks[:,2,:] #[None,d]
             k_1 = tf.reshape(tf.keras.backend.repeat_elements(k_1_init,rep=self.config.FACT_LEN, axis=1),
@@ -177,6 +187,8 @@ class CNN(object):
                                                    stddev=0, seed=3), trainable=True, name='w3')
             weight_4 = tf.Variable(tf.random_normal([2 * self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
                                                    stddev=0, seed=4), trainable=True, name='w4')
+
+
 
 
             k_1_init, k_2_init, k_3_init = ks[:,0,:], ks[:,1,:], ks[:,2,:] #[None,d]
@@ -245,8 +257,10 @@ class CNN(object):
         with tf.name_scope("optimize"):
             # 损失函数，交叉熵
             cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=self.logits,
-                                                                    labels=self.input_y)  # 对logits进行softmax操作后，做交叉墒，输出的是一个向量
-            self.loss = tf.reduce_mean(cross_entropy)  # 将交叉熵向量求和，即可得到交叉熵
+                                                                    labels=self.input_y) # 对logits进行softmax操作后，做交叉墒，输出的是一个向量
+            regularizer = tf.contrib.layers.l2_regularizer(scale=5.0 / 50000)
+            reg_term = tf.contrib.layers.apply_regularization(regularizer)
+            self.loss = tf.reduce_mean(cross_entropy + reg_term)  # 将交叉熵向量求和，即可得到交叉熵
             # 优化器
             self.optim = tf.train.AdamOptimizer(learning_rate=self.config.LEARNING_RATE).minimize(self.loss)
 
