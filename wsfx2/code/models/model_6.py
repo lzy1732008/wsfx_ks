@@ -47,10 +47,10 @@ class CNN(object):
         return
 
     def cnn(self):
-        new_x1,pw = self.gate(self.input_ks,self.input_x1)
-        value = self.match2(new_x1,self.input_x2,pw)
-        # max_result = tf.reshape(value, shape=[-1, self.config.K * self.config.FACT_LEN])
-        self.lastlayer(value)
+        new_x1,pw1 = self.gate(self.input_ks,self.input_x1)
+        new_x2,pw2 = self.gatexy(new_x1,self.input_x2)
+        op1, op2 = self.conv(new_x1,new_x2)
+        self.lastlayer(tf.concat([op1,op2],axis=1))
 
 
 
@@ -80,6 +80,28 @@ class CNN(object):
 
         return new_vector,pw
 
+    def gatexy(self,inputx,inputy):
+        with tf.name_scope("gatexy"):
+            weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
+                                                    stddev=0, seed=1), trainable=True, name='w1')
+            weight_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, self.config.EMBDDING_DIM],
+                                                    stddev=0, seed=1), trainable=True, name='w2')
+            tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_1)
+            tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_1)
+
+            ksw = tf.einsum('abc,cd->abd', inputx, weight_1)  # [None, l, d]
+            ew = tf.einsum('abc,cd->abd', inputy, weight_2)  # [None, l, d]
+
+            ksw_epd = tf.expand_dims(ksw,axis=2)
+            ew_epd = tf.expand_dims(ew,axis=2)
+            temp1 = tf.concat([ksw_epd,ew_epd],axis=2) #[None,l,2,d]
+            pw = tf.sigmoid(temp1)
+            new_vector1 = tf.reduce_sum(temp1 * pw, axis=2)  # [None, l, 1, d]
+            new_vector = tf.reshape(new_vector1, shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
+
+            return new_vector,pw
+
+
     def match2(self,inputx,inputy,pw):
         with tf.name_scope("match"):
             conv1 = tf.layers.conv1d(inputx, filters=self.config.FILTERS, kernel_size=self.config.KERNEL_SIZE,
@@ -99,7 +121,6 @@ class CNN(object):
     def match1(self,inpux,inputy):
         with tf.name_scope("match"):
             matrix_inter = tf.matmul(inpux,inputy,transpose_b=True) #[None,30,30]
-
             inputx1 = tf.expand_dims(input=matrix_inter, axis=3)
             filter_1 = tf.Variable(tf.truncated_normal(self.config.FILTERS, stddev=0.5))
             t1 = tf.nn.conv2d(input=inputx1, filter=filter_1, strides=[1, 1, 1, 1], padding='SAME') #[None,30,30,3]
@@ -107,6 +128,19 @@ class CNN(object):
             value,index = tf.nn.top_k(new_t1,k=self.config.K,sorted=False) #[None,30,3,K]
             value = tf.reshape(value,shape=[-1,self.config.FACT_LEN,self.config.OUTPUTDIM * self.config.K]) #[None,30,3*k]
             return value
+
+    def conv(self, inputx, inputy):
+        with tf.name_scope("conv"):
+            conv1 = tf.layers.conv1d(inputx, filters=self.config.FILTERS, kernel_size=self.config.KERNEL_SIZE,
+                                     name='conv1')
+            op1 = tf.reduce_max(conv1, reduction_indices=[1], name='gmp1')
+
+            conv2 = tf.layers.conv1d(inputy, filters=self.config.FILTERS, kernel_size=self.config.KERNEL_SIZE,
+                                     name='conv2')
+            op2 = tf.reduce_max(conv2, reduction_indices=[1], name='gmp2')
+
+            return op1, op2
+
 
     def addks(self,value,pw):
         with tf.name_scope("addks"):
