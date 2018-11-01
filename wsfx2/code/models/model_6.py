@@ -166,9 +166,9 @@ class CNN(object):
             # 损失函数，交叉熵
             cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=self.logits,
                                                                     labels=self.input_y)  # 对logits进行softmax操作后，做交叉墒，输出的是一个向量
-            regularizer = tf.contrib.layers.l2_regularizer(scale=5.0 / 50000)
-            reg_term = tf.contrib.layers.apply_regularization(regularizer)
-            self.loss = tf.reduce_mean(cross_entropy + reg_term)  # 将交叉熵向量求和，即可得到交叉熵
+            # regularizer = tf.contrib.layers.l2_regularizer(scale=5.0 / 50000)
+            # reg_term = tf.contrib.layers.apply_regularization(regularizer)
+            self.loss = tf.reduce_mean(cross_entropy)  # 将交叉熵向量求和，即可得到交叉熵
             # 优化器
             self.optim = tf.train.AdamOptimizer(learning_rate=self.config.LEARNING_RATE).minimize(self.loss)
 
