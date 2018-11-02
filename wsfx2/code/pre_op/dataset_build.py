@@ -335,6 +335,7 @@ def fun5(data_f,sourcepath,targetpath):
 #========================================================================================================================
 
 '''
+这个是为了模型matchPy.py：
 将train-分词.txt/test-分词.txt/val-分词.txt都映射id的形式:
 文书|len_1|id id id|len_2|id id id id|label
 输出为set_5/train.txt etc

@@ -419,6 +419,7 @@ Confusion Matrix...
  [ 68 210]]
 Time usage: 0:00:18
 
+model5 +gate3+ set4+5gram+noreg+noaddks:
 /home/gjd/PycharmProjects/wsfx_ks/wsfx2/result/set4/model5/checkpoints/noaddks-30-30-5gram-gate3-False
 Testing...
 Test Loss:   0.32, Test Acc:  77.10%

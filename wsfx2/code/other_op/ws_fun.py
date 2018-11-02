@@ -64,7 +64,9 @@ def store_LawQW(sourcepath, targetdict):
         if ft_qw!='': open(targetdict+'/'+ft+'.txt','w',encoding='utf-8').write(ft_qw)
         else: print(ft)
 
-# store_LawQW('../../source/other/allft.txt','../../source/法律全文')
+# store_LawQW('../../source/法条/allft.txt','../../source/法律全文')
+
+
 
 
 

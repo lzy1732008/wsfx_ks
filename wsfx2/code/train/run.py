@@ -11,7 +11,7 @@ import tensorflow as tf
 from sklearn import metrics
 import tensorflow.contrib.keras as kr
 
-from wsfx2.code.models.model_5 import modelConfig, CNN
+from wsfx2.code.models.model_8 import modelConfig, CNN
 from wsfx2.code.train.loader import batch_iter,data_load,data_ngram
 
 data_dir = '../../source/dataset/set_4'
@@ -22,12 +22,12 @@ t_f = open(trainpath,'r',encoding='utf-8')
 v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 3 #kw level
-n_number = 10 #n-gram
-gate_n = 3
+n_number = 1 #n-gram
+gate_n = 1
 reg = False #defalut is false
 
 
-save_dir  = '../../result/set4/model5'  #修改处
+save_dir  = '../../result/set4/model8'  #修改处
 save_path = save_dir+'/checkpoints/noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)+'/best_validation'  # 最佳验证结果保存路径
 tensorboard_dir = save_dir+'/tensorboard/noaddks-30-30-'+str(n_number)+'gram/'+str(gate_n)+'-'+str(reg)  #修改处
 if not os.path.exists(save_path):
@@ -99,7 +99,7 @@ def train():
     start_time = time.time()
     train_1,train_2,train_ks, train_output = data_load(t_f,config, ks_flag)
     #use n-gram**************
-    train_1 = data_ngram(train_1,number=n_number)
+    # train_1 = data_ngram(train_1,number=n_number)
     print('train len:',len(train_1))
 
 
@@ -107,7 +107,7 @@ def train():
     # print(train_3)
     val_1, val_2,val_ks, val_output = data_load(v_f,config, ks_flag)
     # use n-gram**************
-    val_1 = data_ngram(val_1,number=n_number)
+    # val_1 = data_ngram(val_1,number=n_number)
     print('validation len:', len(val_1))
 
     time_dif = get_time_dif(start_time)
@@ -175,7 +175,7 @@ def test():
     start_time = time.time()
     x1_test, x2_test,ks_test, y_test = data_load(test_f, config, flag=ks_flag)
     #n-gram
-    x1_test = data_ngram(x1_test,number=n_number)
+    # x1_test = data_ngram(x1_test,number=n_number)
 
     session = tf.Session()
     session.run(tf.global_variables_initializer())
@@ -218,6 +218,5 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-# train()
+train()
 # test()
-train_1,train_2,train_ks, train_output = data_load(v_f,config, ks_flag)
