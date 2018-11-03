@@ -94,8 +94,8 @@ def data_load(data_f, config, flag=3):
         input_ks.append(zs_matrix)
 
 
-    train_1 = kr.preprocessing.sequence.pad_sequences(np.array(input_x1), config.FACT_LEN-1)
-    train_2 = kr.preprocessing.sequence.pad_sequences(np.array(input_x2), config.LAW_LEN-1)
+    train_1 = kr.preprocessing.sequence.pad_sequences(np.array(input_x1), config.FACT_LEN)
+    train_2 = kr.preprocessing.sequence.pad_sequences(np.array(input_x2), config.LAW_LEN)
     train_ks = np.array(input_ks)
 
     return train_1,train_2,train_ks,np.array(input_y)

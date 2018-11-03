@@ -9,8 +9,8 @@ import tensorflow as tf
 class modelConfig(object):
     def __init__(self):
         self.EMBDDING_DIM = 128
-        self.FACT_LEN = 31
-        self.LAW_LEN = 31
+        self.FACT_LEN = 30
+        self.LAW_LEN = 30
         self.KS_LEN = 3
 
         self.FILTERS = 256
