@@ -25,11 +25,12 @@ ks_flag = 3 #kw level
 n_number = 1 #n-gram
 gate_n = 1
 reg = False #defalut is false
+order =4
 
 
 save_dir  = '../../result/set4/model8'  #修改处
-save_path = save_dir+'/checkpoints/noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)+'/best_validation'  # 最佳验证结果保存路径
-tensorboard_dir = save_dir+'/tensorboard/noaddks-30-30-'+str(n_number)+'gram/'+str(gate_n)+'-'+str(reg)  #修改处
+save_path = save_dir+'/checkpoints/time:'+str(order)+'noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)+'/best_validation'  # 最佳验证结果保存路径
+tensorboard_dir = save_dir+'/tensorboard/time:'+str(order)+'noaddks-30-30-'+str(n_number)+'gram/'+str(gate_n)+'-'+str(reg)  #修改处
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 if not os.path.exists(tensorboard_dir):
