@@ -30,9 +30,9 @@ class modelConfig(object):
 class CNN(object):
     def __init__(self, config):
         self.config = config
-        self.input_x1 = tf.placeholder(tf.float32, [None, self.config.FACT_LEN, self.config.EMBDDING_DIM],
+        self.input_x1 = tf.placeholder(tf.float32, [None, self.config.FACT_LEN + 2, self.config.EMBDDING_DIM],
                                        name='input_x1')
-        self.input_x2 = tf.placeholder(tf.float32, [None, self.config.LAW_LEN, self.config.EMBDDING_DIM],
+        self.input_x2 = tf.placeholder(tf.float32, [None, self.config.LAW_LEN + 2, self.config.EMBDDING_DIM],
                                        name='input_x2')
         self.input_ks = tf.placeholder(tf.float32, [None, self.config.KS_LEN, self.config.EMBDDING_DIM],
                                        name="input_ks")

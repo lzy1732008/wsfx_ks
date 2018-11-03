@@ -101,7 +101,8 @@ def data_load(data_f, config, flag=3):
     return train_1,train_2,train_ks,np.array(input_y)
 
 #给每个文本加上一个start向量
-def addStart(inputx,inputy):
+#默认是0-start/1-end
+def addStart(inputx,inputy,config,flag=0):
     start = np.random.randn(128)
     inputx = list(inputx)
     inputy = list(inputy)
@@ -109,11 +110,17 @@ def addStart(inputx,inputy):
     new_inputy = []
 
     for s in inputx:
-        s.insert(0,start)
+        if flag == 0:
+            s.insert(0,start)
+        else:
+            s.insert(config.FACT_LEN, start)
         new_inputx.append(s)
 
     for s in inputy:
-        s.insert(0,start)
+        if flag == 0:
+            s.insert(0,start)
+        else:
+            s.insert(config.FACT_LEN, start)
         new_inputy.append(s)
     return new_inputx, new_inputy
 

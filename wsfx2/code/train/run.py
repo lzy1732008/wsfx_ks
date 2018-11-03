@@ -102,7 +102,8 @@ def train():
     #use n-gram**************
     # train_1 = data_ngram(train_1,number=n_number)
     #add start
-    # train_1,train_2 = addStart(train_1,train_2)
+    train_1, train_2 = addStart(train_1, train_2, config, flag=0)
+    train_1, train_2 = addStart(train_1, train_2, config, flag=1)
     print('train len:',len(train_1))
 
 
@@ -112,7 +113,8 @@ def train():
     # use n-gram**************
     # val_1 = data_ngram(val_1,number=n_number)
     #add start
-    # val_1,val_2 = addStart(val_1,val_2)
+    val_1, val_2 = addStart(val_1, val_2, config, flag=0)
+    val_1, val_2 = addStart(val_1, val_2, config, flag=1)
     print('validation len:', len(val_1))
 
     time_dif = get_time_dif(start_time)
@@ -181,6 +183,10 @@ def test():
     x1_test, x2_test,ks_test, y_test = data_load(test_f, config, flag=ks_flag)
     #n-gram
     # x1_test = data_ngram(x1_test,number=n_number)
+    #addstart
+    x1_test, x2_test = addStart(x1_test, x2_test, config, flag=0)
+    x1_test, x2_test = addStart(x1_test, x2_test, config, flag=1)
+
 
     session = tf.Session()
     session.run(tf.global_variables_initializer())
@@ -223,5 +229,5 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-# train()
-test()
+train()
+# test()
