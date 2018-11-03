@@ -25,7 +25,7 @@ ks_flag = 3 #kw level
 n_number = 1 #n-gram
 gate_n = 1
 reg = False #defalut is false
-order =1
+order =3
 
 
 save_dir  = '../../result/set4/model8'  #修改处

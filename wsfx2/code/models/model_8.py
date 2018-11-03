@@ -92,20 +92,20 @@ class CNN(object):
         return n_vector, tf.concat([ksw_1, ksw_2, ksw_3], axis=2)
 
         '''
-        基于gate1，加上前一个词的每个级别的概率值作为先验知识的一部分
-        s1 = tf.sigmoid(tf.relu(x * w * [k_1;s1'])) 计算得到关于这个先验知识哪些dim应该被保留,这个weight是[128,1]
-        s2 = tf.sigmoid(tf.relu(x * w * [k_2;s1;s2']))
-        s3 = tf.sigmoid(tf.relu(x * w * [k_3;s2;s3']))
+        基于gate1，加上前一个词和后一个词的每个级别的概率值作为先验知识的一部分
+        s1 = tf.sigmoid(tf.relu([xf;xh] * w * [k_1])) 计算得到关于这个先验知识哪些dim应该被保留,这个weight是[128,1]
+        s2 = tf.sigmoid(tf.relu([xf;xh] * [k_2;s1]))
+        s3 = tf.sigmoid(tf.relu([xf;xh] * w * [k_3;s2]))
         new_vector = s1 * x + s2 * x + s3 * x
 
         '''
     def gate2(self, ks, inputx):
         with tf.name_scope("gate"):
-            weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 2],
+            weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
                                                     stddev=0, seed=1), trainable=True, name='w1')
-            weight_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 3],
+            weight_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 2],
                                                     stddev=0, seed=2), trainable=True, name='w2')
-            weight_3 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 3],
+            weight_3 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 2],
                                                     stddev=0, seed=3), trainable=True, name='w3')
 
             # tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_1)
@@ -119,16 +119,29 @@ class CNN(object):
                              shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
             k_3 = tf.reshape(tf.keras.backend.repeat_elements(k_3_init, rep=self.config.FACT_LEN, axis=1),
                              shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
-            inputx_epd = tf.expand_dims(inputx, axis=2)  # [b,l,1,d]
-            fun1 = tf.einsum('abcd,de->abce', inputx_epd, weight_1)
+
+            inputx_arr = inputx.eval()
+            batch_size = inputx_arr.shape[0]
+            new_inputx = []
+            for _ in range(batch_size):
+                sample = []
+                for i in range(1,self.config.FACT_LEN):
+                    ctx = (inputx_arr[_,i-1] + inputx_arr[_,i+1])/2
+                    sample.append(ctx)
+                new_inputx.append(sample)
+            nputx_ctx = tf.convert_to_tensor(new_inputx) #[None,l,d]
+            nputx_ctx_epd = tf.expand_dims(nputx_ctx,axis=2) #[None,l,1,d]
+            inputx_epd = tf.expand_dims(inputx[:,1:self.config.FACT_LEN,:],axis=2) #[None,l,1,d]
+
+            fun1 = tf.einsum('abcd,de->abce',nputx_ctx_epd , weight_1)
             ksw_1 = tf.sigmoid(
                 tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun1, k_2)))  # [batch,l,1,d]
 
-            fun2 = tf.einsum('abcd,de->abce', inputx_epd, weight_2)
+            fun2 = tf.einsum('abcd,de->abce',nputx_ctx_epd , weight_2)
             ksw_2 = tf.sigmoid(
                 tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun2, tf.concat([k_3, ksw_1], axis=2))))  # [batch,l,d]
 
-            fun3 = tf.einsum('abcd,de->abce', inputx_epd, weight_3)
+            fun3 = tf.einsum('abcd,de->abce',nputx_ctx_epd , weight_3)
             ksw_3 = tf.sigmoid(
                 tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun3, tf.concat([k_1, ksw_2], axis=2))))  # [batch,l,d]
 
