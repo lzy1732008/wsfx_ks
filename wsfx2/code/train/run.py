@@ -12,7 +12,7 @@ from sklearn import metrics
 import tensorflow.contrib.keras as kr
 
 from wsfx2.code.models.model_8 import modelConfig, CNN
-from wsfx2.code.train.loader import batch_iter,data_load,data_ngram
+from wsfx2.code.train.loader import batch_iter,data_load,data_ngram,addStart
 
 data_dir = '../../source/dataset/set_4'
 trainpath = data_dir+'/train.txt'
@@ -101,6 +101,8 @@ def train():
     train_1,train_2,train_ks, train_output = data_load(t_f,config, ks_flag)
     #use n-gram**************
     # train_1 = data_ngram(train_1,number=n_number)
+    #add start
+    # train_1,train_2 = addStart(train_1,train_2)
     print('train len:',len(train_1))
 
 
@@ -109,6 +111,8 @@ def train():
     val_1, val_2,val_ks, val_output = data_load(v_f,config, ks_flag)
     # use n-gram**************
     # val_1 = data_ngram(val_1,number=n_number)
+    #add start
+    # val_1,val_2 = addStart(val_1,val_2)
     print('validation len:', len(val_1))
 
     time_dif = get_time_dif(start_time)

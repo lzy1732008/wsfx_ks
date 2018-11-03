@@ -9,8 +9,8 @@ import tensorflow as tf
 class modelConfig(object):
     def __init__(self):
         self.EMBDDING_DIM = 128
-        self.FACT_LEN = 30
-        self.LAW_LEN = 30
+        self.FACT_LEN = 31
+        self.LAW_LEN = 31
         self.KS_LEN = 3
 
         self.FILTERS = 256
@@ -47,7 +47,6 @@ class CNN(object):
         new_x1, pwls = self.gate1(self.input_ks, self.input_x1)
         op1, op2 = self.conv(new_x1, self.input_x2)
         self.match(op1, op2)
-
 
     '''
     s1 = tf.sigmoid(tf.relu(x * w * k_1)) 计算得到关于这个先验知识哪些dim应该被保留,这个weight是[128,1]
@@ -92,6 +91,51 @@ class CNN(object):
 
         return n_vector, tf.concat([ksw_1, ksw_2, ksw_3], axis=2)
 
+        '''
+        基于gate1，加上前一个词的每个级别的概率值作为先验知识的一部分
+        s1 = tf.sigmoid(tf.relu(x * w * [k_1;s1'])) 计算得到关于这个先验知识哪些dim应该被保留,这个weight是[128,1]
+        s2 = tf.sigmoid(tf.relu(x * w * [k_2;s1;s2']))
+        s3 = tf.sigmoid(tf.relu(x * w * [k_3;s2;s3']))
+        new_vector = s1 * x + s2 * x + s3 * x
+
+        '''
+    def gate2(self, ks, inputx):
+        with tf.name_scope("gate"):
+            weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 2],
+                                                    stddev=0, seed=1), trainable=True, name='w1')
+            weight_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 3],
+                                                    stddev=0, seed=2), trainable=True, name='w2')
+            weight_3 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 3],
+                                                    stddev=0, seed=3), trainable=True, name='w3')
+
+            # tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_1)
+            # tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_1)
+            # tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_3)
+
+            k_1_init, k_2_init, k_3_init = ks[:, 0, :], ks[:, 1, :], ks[:, 2, :]  # [None,d]
+            k_1 = tf.reshape(tf.keras.backend.repeat_elements(k_1_init, rep=self.config.FACT_LEN, axis=1),
+                             shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
+            k_2 = tf.reshape(tf.keras.backend.repeat_elements(k_2_init, rep=self.config.FACT_LEN, axis=1),
+                             shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
+            k_3 = tf.reshape(tf.keras.backend.repeat_elements(k_3_init, rep=self.config.FACT_LEN, axis=1),
+                             shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
+            inputx_epd = tf.expand_dims(inputx, axis=2)  # [b,l,1,d]
+            fun1 = tf.einsum('abcd,de->abce', inputx_epd, weight_1)
+            ksw_1 = tf.sigmoid(
+                tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun1, k_2)))  # [batch,l,1,d]
+
+            fun2 = tf.einsum('abcd,de->abce', inputx_epd, weight_2)
+            ksw_2 = tf.sigmoid(
+                tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun2, tf.concat([k_3, ksw_1], axis=2))))  # [batch,l,d]
+
+            fun3 = tf.einsum('abcd,de->abce', inputx_epd, weight_3)
+            ksw_3 = tf.sigmoid(
+                tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun3, tf.concat([k_1, ksw_2], axis=2))))  # [batch,l,d]
+
+            n_vector_ = (ksw_1 + ksw_2 + ksw_3) * inputx_epd
+            n_vector = tf.reshape(n_vector_, shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
+
+        return n_vector, tf.concat([ksw_1, ksw_2, ksw_3], axis=2)
 
     def conv(self, inputx, inputy):
         with tf.name_scope("conv"):

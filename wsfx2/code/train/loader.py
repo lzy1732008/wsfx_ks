@@ -18,7 +18,8 @@ else:
 
 def data_convert(vectors):
     ssls = list(filter(lambda x:x.strip() != '', vectors))
-    return [list(map(float, list(filter(lambda x: x.strip() != '', ss.split('//'))))) for ss in ssls]
+    n_vector = [list(map(float, list(filter(lambda x: x.strip() != '', ss.split('//'))))) for ss in ssls]
+    return n_vector
 
 #2 inputs
 def data_load2(data_f,config):
@@ -93,11 +94,28 @@ def data_load(data_f, config, flag=3):
         input_ks.append(zs_matrix)
 
 
-    train_1 = kr.preprocessing.sequence.pad_sequences(np.array(input_x1), config.FACT_LEN)
-    train_2 = kr.preprocessing.sequence.pad_sequences(np.array(input_x2), config.LAW_LEN)
+    train_1 = kr.preprocessing.sequence.pad_sequences(np.array(input_x1), config.FACT_LEN-1)
+    train_2 = kr.preprocessing.sequence.pad_sequences(np.array(input_x2), config.LAW_LEN-1)
     train_ks = np.array(input_ks)
 
     return train_1,train_2,train_ks,np.array(input_y)
+
+#给每个文本加上一个start向量
+def addStart(inputx,inputy):
+    start = np.random.randn(128)
+    inputx = list(inputx)
+    inputy = list(inputy)
+    new_inputx = []
+    new_inputy = []
+
+    for s in inputx:
+        s.insert(0,start)
+        new_inputx.append(s)
+
+    for s in inputy:
+        s.insert(0,start)
+        new_inputy.append(s)
+    return new_inputx, new_inputy
 
 #5-input
 def data_load5(data_f,config):
