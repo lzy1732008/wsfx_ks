@@ -23,9 +23,9 @@ v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 3 #kw level
 n_number = 1 #n-gram
-gate_n = 1
+gate_n = 2
 reg = False #defalut is false
-order =3
+order =1
 
 
 save_dir  = '../../result/set4/model8'  #修改处
@@ -223,5 +223,5 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-train()
-# test()
+# train()
+test()

@@ -755,7 +755,54 @@ Confusion Matrix...
 Time usage: 0:00:15
 
 
+231 order:
+1
+Testing...
+Test Loss:   0.25, Test Acc:  79.52%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
 
+          0     0.8936    0.9239    0.9085       591
+          1     0.8256    0.7662    0.7948       278
+
+avg / total     0.8719    0.8734    0.8721       869
+
+Confusion Matrix...
+[[546  45]
+ [ 65 213]]
+Time usage: 0:00:16
+
+2:
+Testing...
+Test Loss:   0.25, Test Acc:  76.75%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8738    0.9019    0.8876       591
+          1     0.7761    0.7230    0.7486       278
+
+avg / total     0.8425    0.8446    0.8431       869
+
+Confusion Matrix...
+[[533  58]
+ [ 77 201]]
+Time usage: 0:00:16
+
+3:
+esting...
+Test Loss:   0.24, Test Acc:  78.60%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8935    0.9086    0.9010       591
+          1     0.7985    0.7698    0.7839       278
+
+avg / total     0.8631    0.8642    0.8635       869
+
+Confusion Matrix...
+[[537  54]
+ [ 64 214]]
+Time usage: 0:00:16
 
 
 
