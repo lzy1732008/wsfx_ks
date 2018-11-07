@@ -64,8 +64,8 @@ def fun1(exceldict,target):
 '''
 训练数据
 '''
-# exceldict = '../../source/valset'
-# target = '../../source/dataset/set-3/val-原始训练集.txt'
+# exceldict = '../../source/训练集'
+# target = '../../source/dataset/set-lyw/train-原始训练集.txt'
 # fun1(exceldict,target)
 
 '''
@@ -111,8 +111,8 @@ def fun2(ft_zs_f,data_f,newdata_f):
 训练数据
 '''
 # ftzs_path = '../../source/法条/ft_nr_先验知识.txt'
-# data_path = '../../source/dataset/set-3/val-原始训练集.txt'
-# newdata_path = '../../source/dataset/set-3/val-添加先验知识.txt'
+# data_path = '../../source/dataset/set-lyw/train-原始训练集.txt'
+# newdata_path = '../../source/dataset/set-lyw/train-添加先验知识.txt'
 # f1 = open(ftzs_path,'r',encoding='utf-8')
 # f2 = open(data_path,'r',encoding='utf-8')
 # f3 = open(newdata_path,'w',encoding='utf-8')
@@ -175,8 +175,8 @@ def fun3(data_f,target_f):
 '''
 训练数据
 '''
-# data_f= open('../../source/dataset/set-3/val-添加先验知识.txt','r',encoding='utf-8')
-# tartget_f = open('../../source/dataset/set-3/val-分词.txt','w',encoding='utf-8')
+# data_f= open('../../sourcepath/dataset/set-lyw/train-添加先验知识.txt','r',encoding='utf-8')
+# tartget_f = open('../../source/dataset/set-lyw/train-分词.txt','w',encoding='utf-8')
 # fun3(data_f,tartget_f)
 
 '''
@@ -252,8 +252,8 @@ def zsVector(zwls, word_m,flag=1):
 '''
 训练数据
 '''
-# data_f= open('../../source/dataset/set_1/test-分词.txt','r',encoding='utf-8')
-# tartget_f = open('../../source/dataset/set_4/test.txt','w',encoding='utf-8')
+# data_f= open('../../source/dataset/set-lyw/train-分词.txt','r',encoding='utf-8')
+# tartget_f = open('../../source/dataset/set-lyw/train.txt','w',encoding='utf-8')
 # model_ss = load_models('../../source/wordvector/ssmodel_size128.model')
 # model_ft = load_models('../../source/wordvector/ssmodel_size128.model')
 # fun4(data_f,tartget_f,model_ss,model_ft)
@@ -399,13 +399,13 @@ set dictionary
 '''
 convert input text into ids
 '''
-corpuspath = '../../source/wordvector/words.txt'
-sourcepath = '../../source/dataset/set_1/val-分词.txt'
-targetpath = '../../source/dataset/set_5/val.txt'
-f1 = open(sourcepath,'r',encoding='utf-8')
-f2 = open(corpuspath,'r',encoding='utf-8')
-f3 = open(targetpath,'w',encoding='utf-8')
-fun7(f1,f2,f3)
+# corpuspath = '../../source/wordvector/words.txt'
+# sourcepath = '../../source/dataset/set_1/val-分词.txt'
+# targetpath = '../../source/dataset/set_5/val.txt'
+# f1 = open(sourcepath,'r',encoding='utf-8')
+# f2 = open(corpuspath,'r',encoding='utf-8')
+# f3 = open(targetpath,'w',encoding='utf-8')
+# fun7(f1,f2,f3)
 
 
 

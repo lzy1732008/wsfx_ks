@@ -4,6 +4,7 @@
 
 
 import tensorflow as tf
+import numpy as np
 
 
 class modelConfig(object):
@@ -30,9 +31,9 @@ class modelConfig(object):
 class CNN(object):
     def __init__(self, config):
         self.config = config
-        self.input_x1 = tf.placeholder(tf.float32, [None, self.config.FACT_LEN + 2, self.config.EMBDDING_DIM],
+        self.input_x1 = tf.placeholder(tf.float32, [None, self.config.FACT_LEN , self.config.EMBDDING_DIM],
                                        name='input_x1')
-        self.input_x2 = tf.placeholder(tf.float32, [None, self.config.LAW_LEN + 2, self.config.EMBDDING_DIM],
+        self.input_x2 = tf.placeholder(tf.float32, [None, self.config.LAW_LEN , self.config.EMBDDING_DIM],
                                        name='input_x2')
         self.input_ks = tf.placeholder(tf.float32, [None, self.config.KS_LEN, self.config.EMBDDING_DIM],
                                        name="input_ks")
@@ -44,7 +45,8 @@ class CNN(object):
         return
 
     def cnn(self):
-        new_x1, pwls = self.gate2(self.input_ks, self.input_x1)
+        # context = self.count_context(self.input_x1)
+        new_x1, pwls = self.gate3(self.input_ks, self.input_x1)
         op1, op2 = self.conv(new_x1, self.input_x2)
         self.match(op1, op2)
 
@@ -53,7 +55,6 @@ class CNN(object):
     s2 = tf.sigmoid(tf.relu(x * w * [k_2;s1]))
     s3 = tf.sigmoid(tf.relu(x * w * [k_3;s2]))
     new_vector = s1 * x + s2 * x + s3 * x
-
     '''
 
     def gate1(self, ks, inputx):
@@ -99,7 +100,22 @@ class CNN(object):
         new_vector = s1 * x + s2 * x + s3 * x
 
         '''
-    def gate2(self, ks, inputx):
+    def count_context(self,inputx):
+        with tf.name_scope("cmp_context"):
+            inputx_re = tf.reshape(inputx,shape=[self.config.FACT_LEN+2,-1])
+            new_inputx = []
+            for i in range(1,self.config.FACT_LEN+1):
+                mean = tf.add(inputx_re[i-1,:] , inputx_re[i+1,:])
+                mean = tf.convert_to_tensor(mean)
+                new_inputx.append(mean)
+
+            nputx_ctx = tf.convert_to_tensor(new_inputx)
+            nputx_ctx = tf.reshape(nputx_ctx,shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
+            return nputx_ctx
+
+
+
+    def gate2(self, ks, inputx, nputx_ctx):
         with tf.name_scope("gate"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
                                                     stddev=0, seed=1), trainable=True, name='w1')
@@ -120,35 +136,62 @@ class CNN(object):
             k_3 = tf.reshape(tf.keras.backend.repeat_elements(k_3_init, rep=self.config.FACT_LEN, axis=1),
                              shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
 
-            inputx_arr = inputx.eval()
-            batch_size = inputx_arr.shape[0]
-            new_inputx = []
-            for _ in range(batch_size):
-                sample = []
-                for i in range(1,self.config.FACT_LEN):
-                    ctx = (inputx_arr[_,i-1] + inputx_arr[_,i+1])/2
-                    sample.append(ctx)
-                new_inputx.append(sample)
-            nputx_ctx = tf.convert_to_tensor(new_inputx) #[None,l,d]
             nputx_ctx_epd = tf.expand_dims(nputx_ctx,axis=2) #[None,l,1,d]
-            inputx_epd = tf.expand_dims(inputx[:,1:self.config.FACT_LEN,:],axis=2) #[None,l,1,d]
+            inputx_epd = tf.expand_dims(inputx[:,1:self.config.FACT_LEN+1,:],axis=2) #[None,l,1,d]
 
             fun1 = tf.einsum('abcd,de->abce',nputx_ctx_epd , weight_1)
             ksw_1 = tf.sigmoid(
-                tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun1, k_2)))  # [batch,l,1,d]
+                tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun1, k_1)))  # [batch,l,1,d]
 
             fun2 = tf.einsum('abcd,de->abce',nputx_ctx_epd , weight_2)
             ksw_2 = tf.sigmoid(
-                tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun2, tf.concat([k_3, ksw_1], axis=2))))  # [batch,l,d]
+                tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun2, tf.concat([k_2, ksw_1], axis=2))))  # [batch,l,d]
 
             fun3 = tf.einsum('abcd,de->abce',nputx_ctx_epd , weight_3)
             ksw_3 = tf.sigmoid(
-                tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun3, tf.concat([k_1, ksw_2], axis=2))))  # [batch,l,d]
+                tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun3, tf.concat([k_3, ksw_2], axis=2))))  # [batch,l,d]
 
             n_vector_ = (ksw_1 + ksw_2 + ksw_3) * inputx_epd
             n_vector = tf.reshape(n_vector_, shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
 
         return n_vector, tf.concat([ksw_1, ksw_2, ksw_3], axis=2)
+
+    def gate3(self, ks, inputx):
+        with tf.name_scope("gate"):
+            weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+                                                    stddev=0, seed=1), trainable=True, name='w1')
+            weight_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+                                                    stddev=0, seed=2), trainable=True, name='w2')
+            weight_3 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+                                                    stddev=0, seed=3), trainable=True, name='w3')
+
+            # tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_1)
+            # tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_1)
+            # tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_3)
+
+            k_1_init, k_2_init, k_3_init = ks[:, 0, :], ks[:, 1, :], ks[:, 2, :]  # [None,d]
+            k_1 = tf.reshape(tf.keras.backend.repeat_elements(k_1_init, rep=self.config.FACT_LEN, axis=1),
+                             shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
+            k_2 = tf.reshape(tf.keras.backend.repeat_elements(k_2_init, rep=self.config.FACT_LEN, axis=1),
+                             shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
+            k_3 = tf.reshape(tf.keras.backend.repeat_elements(k_3_init, rep=self.config.FACT_LEN, axis=1),
+                             shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
+            inputx_epd = tf.expand_dims(inputx, axis=2) #[b,l,1,d]
+            fun1 = tf.einsum('abcd,de->abce', inputx_epd, weight_1)
+            ksw_1 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun1, k_1)))  # [batch,l,1,d]
+
+            fun2 = tf.einsum('abcd,de->abce', inputx_epd, weight_2)
+            ksw_2 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun2, k_2)))  # [batch,l,d]
+
+            fun3 = tf.einsum('abcd,de->abce',inputx_epd , weight_3)
+            ksw_3 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun3, k_3)))  # [batch,l,d]
+
+            n_vector_ = (ksw_1 + ksw_2 + ksw_3) * inputx_epd
+            n_vector = tf.reshape(n_vector_, shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
+
+        return n_vector, tf.concat([ksw_1, ksw_2, ksw_3], axis=2)
+
+
 
     def conv(self, inputx, inputy):
         with tf.name_scope("conv"):

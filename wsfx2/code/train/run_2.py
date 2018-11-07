@@ -22,10 +22,11 @@ t_f = open(trainpath,'r',encoding='utf-8')
 v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 1
+times = 3
 
 save_dir  = '../../result/set2/mvlstm_model'  #修改处
-save_path = save_dir+'/checkpoints/30-30-k=5-output=16/best_validation'  # 最佳验证结果保存路径
-tensorboard_dir = save_dir+'/tensorboard/30-30-k=5-output=16/'  #修改处
+save_path = save_dir+'/checkpoints/times:'+str(times)+'30-30-k=5-output=16/best_validation'  # 最佳验证结果保存路径
+tensorboard_dir = save_dir+'/tensorboard/times'+str(times)+'30-30-k=5-output=16/'  #修改处
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 if not os.path.exists(tensorboard_dir):
@@ -194,7 +195,7 @@ def test():
 
 
     print("Precision, Recall and F1-Score...")
-    print(metrics.classification_report(y_test_cls, y_pred_cls,digits=3))#直接计算准确率，召回率和f值
+    print(metrics.classification_report(y_test_cls, y_pred_cls,digits=4))#直接计算准确率，召回率和f值
 
     # 混淆矩阵
     print("Confusion Matrix...")

@@ -11,7 +11,7 @@ import tensorflow as tf
 from sklearn import metrics
 import tensorflow.contrib.keras as kr
 
-from wsfx2.code.models.model_8 import modelConfig, CNN
+from wsfx2.code.models.model_8 import modelConfig,CNN
 from wsfx2.code.train.loader import batch_iter,data_load,data_ngram,addStart
 
 data_dir = '../../source/dataset/set_4'
@@ -23,14 +23,15 @@ v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 3 #kw level
 n_number = 1 #n-gram
-gate_n = 2
+gate_n = 3
 reg = False #defalut is false
-order =1
+times =1
+ks_order = '123'
 
 
 save_dir  = '../../result/set4/model8'  #修改处
-save_path = save_dir+'/checkpoints/231-time:'+str(order)+'noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)+'/best_validation'  # 最佳验证结果保存路径
-tensorboard_dir = save_dir+'/tensorboard/231-time:'+str(order)+'noaddks-30-30-'+str(n_number)+'gram/'+str(gate_n)+'-'+str(reg)  #修改处
+save_path = save_dir+'/checkpoints/'+ks_order+'-time:'+str(times)+'noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)+'/best_validation'  # 最佳验证结果保存路径
+tensorboard_dir = save_dir+'/tensorboard/'+ks_order+'-time:'+str(times)+'noaddks-30-30-'+str(n_number)+'gram/'+str(gate_n)+'-'+str(reg)  #修改处
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 if not os.path.exists(tensorboard_dir):
@@ -102,9 +103,10 @@ def train():
     #use n-gram**************
     # train_1 = data_ngram(train_1,number=n_number)
     #add start
-    train_1, train_2 = addStart(train_1, train_2, config, flag=0)
-    train_1, train_2 = addStart(train_1, train_2, config, flag=1)
-    print('train len:',len(train_1))
+    # train_1, train_2 = addStart(train_1, train_2, config, flag=0)
+    # train_1, train_2 = addStart(train_1, train_2, config, flag=1)
+    print('train len:',train_1.shape)
+
 
 
 
@@ -113,8 +115,8 @@ def train():
     # use n-gram**************
     # val_1 = data_ngram(val_1,number=n_number)
     #add start
-    val_1, val_2 = addStart(val_1, val_2, config, flag=0)
-    val_1, val_2 = addStart(val_1, val_2, config, flag=1)
+    # val_1, val_2 = addStart(val_1, val_2, config, flag=0)
+    # val_1, val_2 = addStart(val_1, val_2, config, flag=1)
     print('validation len:', len(val_1))
 
     time_dif = get_time_dif(start_time)
@@ -184,8 +186,8 @@ def test():
     #n-gram
     # x1_test = data_ngram(x1_test,number=n_number)
     #addstart
-    x1_test, x2_test = addStart(x1_test, x2_test, config, flag=0)
-    x1_test, x2_test = addStart(x1_test, x2_test, config, flag=1)
+    # x1_test, x2_test = addStart(x1_test, x2_test, config, flag=0)
+    # x1_test, x2_test = addStart(x1_test, x2_test, config, flag=1)
 
 
     session = tf.Session()
@@ -229,5 +231,7 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-train()
-# test()
+# train()
+test()
+
+

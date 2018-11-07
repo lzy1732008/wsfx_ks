@@ -70,7 +70,7 @@ def batch_iter2(x1, x2,  y, batch_size=128):
 def data_load(data_f, config, flag=3):
     input_x1,input_x2,input_ks,input_y = [], [], [], []
     lines = data_f.read().split('\n')
-    for i in range(130):
+    for i in range(len(lines)):
         line = lines[i]
         print('index:',i)
         if line.strip() == "":
@@ -100,16 +100,18 @@ def data_load(data_f, config, flag=3):
 
     return train_1,train_2,train_ks,np.array(input_y)
 
-#给每个文本加上一个start向量
+#给每个文本加上一个start/end向量
 #默认是0-start/1-end
 def addStart(inputx,inputy,config,flag=0):
-    start = np.random.randn(128)
+    start = np.float32(np.random.randn(128))
     inputx = list(inputx)
     inputy = list(inputy)
     new_inputx = []
     new_inputy = []
 
+
     for s in inputx:
+        s = list(s)
         if flag == 0:
             s.insert(0,start)
         else:
@@ -117,12 +119,28 @@ def addStart(inputx,inputy,config,flag=0):
         new_inputx.append(s)
 
     for s in inputy:
+        s = list(s)
         if flag == 0:
             s.insert(0,start)
         else:
             s.insert(config.FACT_LEN, start)
         new_inputy.append(s)
-    return new_inputx, new_inputy
+    return np.array(new_inputx), np.array(new_inputy)
+
+
+#compute context
+def addcontext(inputx):
+    batch_size = inputx.shape[0]
+    new_inputx = []
+    for _ in range(batch_size):
+        sample = []
+        for i in range(1, inputx.shape[1]):
+            ctx = (inputx[_, i - 1] + inputx[_, i + 1]) / 2
+            sample.append(ctx)
+        new_inputx.append(sample)
+    return np.array(new_inputx)
+
+
 
 #5-input
 def data_load5(data_f,config):
