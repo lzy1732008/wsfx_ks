@@ -47,7 +47,8 @@ class CNN(object):
     def cnn(self):
         # context = self.count_context(self.input_x1)
         self.new_x1, pwls = self.gate1(self.input_ks, self.input_x1)
-        self.new_x2 = self.gate1_s2l(self.new_x1, self.input_x2)
+        self.new_x1_mean = self.precessF2(self.new_x1)
+        self.new_x2 = self.Mirrorgate1(self.new_x1_mean, self.input_x2)
         op1, op2 = self.conv(self.new_x1, self.new_x2)
         self.match(op1, op2)
 
@@ -193,16 +194,31 @@ class CNN(object):
         return n_vector, tf.concat([ksw_1, ksw_2, ksw_3], axis=2)
 
     '''
+    preprocess fact before filter law
+    '''
+    def precessF1(self,inputx):
+        with tf.name_scope("FactPrecess"):
+            inputx_ = tf.reduce_mean(inputx,axis=1) #[None,1,d]
+            return inputx_
+
+    def precessF2(self,inputx):
+        with tf.name_scope("FactPrecess"):
+            inputx_ = tf.transpose(inputx,perm=[0,2,1])
+            inputx_k = tf.transpose((tf.nn.top_k(inputx_,k=5,sorted=False))[0],perm=[0,2,1]) #[None.k,d]
+            inputx_mean = tf.reduce_mean(inputx_k, axis=1)
+            return inputx_mean
+    '''
     根据事实作为先验知识去过滤法条
     '''
-    def gate1_s2l(self,inputx,inputy):
+    def Mirrorgate1(self,inputx,inputy):
         with tf.name_scope("Fact2Law"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
                                                     stddev=0, seed=1), trainable=True, name='w1')
-            ss_epd = tf.expand_dims(inputx, axis=2)  # [b,l,1,d]
+            ss_epd = tf.reshape(tf.keras.backend.repeat_elements(inputx,rep=self.config.LAW_LEN,axis=1),
+                                shape=[-1,self.config.LAW_LEN,1,self.config.EMBDDING_DIM])  # [b,l,1,d]
             law_epd = tf.expand_dims(inputy,axis=2) #[b,l,1,d]
             fun = tf.einsum('abcd,de->abce', law_epd, weight_1)
-            ksw = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,de->abce'),fun, ss_epd)) #[None,l,1,d]
+            ksw = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abde->abce',fun, ss_epd))) #[None,l,1,d]
 
             n_vector_ = ksw * law_epd
             n_vector = tf.reshape(n_vector_, shape=[-1,self.config.LAW_LEN,self.config.EMBDDING_DIM])
