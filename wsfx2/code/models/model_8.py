@@ -13,6 +13,8 @@ class modelConfig(object):
         self.FACT_LEN = 30
         self.LAW_LEN = 30
         self.KS_LEN = 3
+        self.LAW_WIN = 5
+        self.LAW_STRIDES = 1
 
         self.FILTERS = 256
         self.KERNEL_SIZE = 5  # 卷积核尺寸
@@ -48,7 +50,8 @@ class CNN(object):
         # context = self.count_context(self.input_x1)
         self.new_x1, pwls = self.gate1(self.input_ks, self.input_x1)
         self.new_x1_mean = self.precessF2(self.new_x1)
-        self.new_x2 = self.Mirrorgate1(self.new_x1_mean, self.input_x2)
+        self.new_x2 = self.precessL1(self.input_x2)
+        self.new_x2 = self.Mirrorgate1(self.new_x1_mean, self.new_x2)
         op1, op2 = self.conv(self.new_x1, self.new_x2)
         self.match(op1, op2)
 
@@ -208,14 +211,32 @@ class CNN(object):
             inputx_mean = tf.reduce_mean(inputx_k, axis=1)
             return inputx_mean
     '''
+    law n-gram sum
+    '''
+    def precessL1(self,inputy):
+        with tf.name_scope("Lawprecess"):
+            #设置窗口为w=5,strides=2
+            inputy_ = tf.reshape(inputy,shape=[self.config.LAW_LEN,-1])
+            new_inputy_ls = []
+            for i in range(self.config.LAW_LEN-self.config.LAW_WIN):
+                inputy_slice = inputy_[i:i+self.config.LAW_LEN,:] #[law_len,b*d]
+                inputy_slice_mean = tf.reduce_mean(inputy_slice, axis=0) #[1,b*d]
+                inputy_i = tf.convert_to_tensor(inputy_slice_mean)
+                new_inputy_ls.append(inputy_i)
+            new_inputy_ = tf.convert_to_tensor(new_inputy_ls)
+            new_inputy = tf.reshape(new_inputy_,
+                                    shape=[-1,self.config.LAW_LEN-self.config.LAW_WIN+1,self.config.EMBDDING_DIM])
+            return new_inputy
+
+    '''
     根据事实作为先验知识去过滤法条
     '''
     def Mirrorgate1(self,inputx,inputy):
         with tf.name_scope("Fact2Law"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
                                                     stddev=0, seed=1), trainable=True, name='w1')
-            ss_epd = tf.reshape(tf.keras.backend.repeat_elements(inputx,rep=self.config.LAW_LEN,axis=1),
-                                shape=[-1,self.config.LAW_LEN,1,self.config.EMBDDING_DIM])  # [b,l,1,d]
+            ss_epd = tf.reshape(tf.keras.backend.repeat_elements(inputx,rep=(tf.shape(inputy)[1]),axis=1),
+                                shape=[-1,(tf.shape(inputy)[1]),1,self.config.EMBDDING_DIM])  # [b,l,1,d]
             law_epd = tf.expand_dims(inputy,axis=2) #[b,l,1,d]
             fun = tf.einsum('abcd,de->abce', law_epd, weight_1)
             ksw = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abde->abce',fun, ss_epd))) #[None,l,1,d]
