@@ -1,4 +1,4 @@
-#加入上下文的gate3 in model5
+#加入上下文的gate2 in model5
 
 # 添加多级先验知识，并且上一层级得到的[1，d]的score会传入下一层的下一级的计算中，使用的每层计算的权重是两个[d,1]的
 
@@ -156,6 +156,7 @@ class CNN(object):
 
         return n_vector, tf.concat([ksw_1, ksw_2, ksw_3], axis=2)
 
+    #comparision experiment of gate1
     def gate3(self, ks, inputx):
         with tf.name_scope("gate"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
