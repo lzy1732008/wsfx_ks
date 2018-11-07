@@ -84,10 +84,10 @@ class CNN(object):
                              shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
             inputx_epd = tf.expand_dims(inputx, axis=2) #[b,l,1,d]
             fun1 = tf.einsum('abcd,de->abce', inputx_epd, weight_1)
-            ksw_1 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun1, k_2)))  # [batch,l,1,d]
+            ksw_1 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun1, k_1)))  # [batch,l,1,d]
 
             fun2 = tf.einsum('abcd,de->abce', inputx_epd, weight_2)
-            ksw_2 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun2, tf.concat([k_1, ksw_1], axis=2))))  # [batch,l,d]
+            ksw_2 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun2, tf.concat([k_2, ksw_1], axis=2))))  # [batch,l,d]
 
             fun3 = tf.einsum('abcd,de->abce',inputx_epd , weight_3)
             ksw_3 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun3, tf.concat([k_3, ksw_2], axis=2))))  # [batch,l,d]
