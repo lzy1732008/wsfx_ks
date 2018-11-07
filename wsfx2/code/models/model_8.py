@@ -46,8 +46,9 @@ class CNN(object):
 
     def cnn(self):
         # context = self.count_context(self.input_x1)
-        new_x1, pwls = self.gate3(self.input_ks, self.input_x1)
-        op1, op2 = self.conv(new_x1, self.input_x2)
+        self.new_x1, pwls = self.gate1(self.input_ks, self.input_x1)
+        self.new_x2 = self.gate1_s2l(self.new_x1, self.input_x2)
+        op1, op2 = self.conv(self.new_x1, self.new_x2)
         self.match(op1, op2)
 
     '''
@@ -113,8 +114,7 @@ class CNN(object):
             nputx_ctx = tf.reshape(nputx_ctx,shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
             return nputx_ctx
 
-
-
+    #使用上下文的
     def gate2(self, ks, inputx, nputx_ctx):
         with tf.name_scope("gate"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
@@ -192,7 +192,21 @@ class CNN(object):
 
         return n_vector, tf.concat([ksw_1, ksw_2, ksw_3], axis=2)
 
+    '''
+    根据事实作为先验知识去过滤法条
+    '''
+    def gate1_s2l(self,inputx,inputy):
+        with tf.name_scope("Fact2Law"):
+            weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+                                                    stddev=0, seed=1), trainable=True, name='w1')
+            ss_epd = tf.expand_dims(inputx, axis=2)  # [b,l,1,d]
+            law_epd = tf.expand_dims(inputy,axis=2) #[b,l,1,d]
+            fun = tf.einsum('abcd,de->abce', law_epd, weight_1)
+            ksw = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,de->abce'),fun, ss_epd)) #[None,l,1,d]
 
+            n_vector_ = ksw * law_epd
+            n_vector = tf.reshape(n_vector_, shape=[-1,self.config.LAW_LEN,self.config.EMBDDING_DIM])
+        return n_vector
 
     def conv(self, inputx, inputy):
         with tf.name_scope("conv"):
