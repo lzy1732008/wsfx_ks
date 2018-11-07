@@ -84,10 +84,10 @@ class CNN(object):
             ksw_1 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun1, k_2)))  # [batch,l,1,d]
 
             fun2 = tf.einsum('abcd,de->abce', inputx_epd, weight_2)
-            ksw_2 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun2, tf.concat([k_3, ksw_1], axis=2))))  # [batch,l,d]
+            ksw_2 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun2, tf.concat([k_1, ksw_1], axis=2))))  # [batch,l,d]
 
             fun3 = tf.einsum('abcd,de->abce',inputx_epd , weight_3)
-            ksw_3 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun3, tf.concat([k_1, ksw_2], axis=2))))  # [batch,l,d]
+            ksw_3 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun3, tf.concat([k_3, ksw_2], axis=2))))  # [batch,l,d]
 
             n_vector_ = (ksw_1 + ksw_2 + ksw_3) * inputx_epd
             n_vector = tf.reshape(n_vector_, shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])

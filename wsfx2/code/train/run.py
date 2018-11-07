@@ -26,7 +26,7 @@ n_number = 1 #n-gram
 gate_n = 1
 reg = False #defalut is false
 times =3
-ks_order = '231'
+ks_order = '213'
 mirrorgate=  1
 precessF = '2'
 
@@ -233,7 +233,7 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-# train()
-test()
+train()
+# test()
 
 
