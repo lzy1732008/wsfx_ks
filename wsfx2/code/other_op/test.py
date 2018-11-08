@@ -54,14 +54,13 @@ sess = tf.InteractiveSession()
 # print(t.eval(feed_dict=feed_dict))
 
 b = tf.constant([[0,0,0],[1,2,3],[4,5,6],[0,0,0]],name='b')
-print((tf.shape))
-s = []
+len = tf.shape(b)[1]
+print(len)
+# for _ in range(1,(b.shape)[0]-1):
+#     s.append(b[_-1] + b[_+1])
+# news = tf.convert_to_tensor(s)
+# print(sess.run(news))
 
-for _ in range(1,(b.shape)[0]-1):
-    s.append(b[_-1] + b[_+1])
-news = tf.convert_to_tensor(s)
-print(sess.run(news))
-sess.close()
 
 
 

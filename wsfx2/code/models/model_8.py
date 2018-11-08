@@ -13,7 +13,7 @@ class modelConfig(object):
         self.FACT_LEN = 30
         self.LAW_LEN = 30
         self.KS_LEN = 3
-        self.LAW_WIN = 5
+        self.LAW_WIN = 8
         self.LAW_STRIDES = 1
 
         self.FILTERS = 256
@@ -48,10 +48,9 @@ class CNN(object):
 
     def cnn(self):
         # context = self.count_context(self.input_x1)
-        self.new_x1, pwls = self.gate1(self.input_ks, self.input_x1)
+        self.new_x1, pwls = self.gate1_single(self.input_ks, self.input_x1)
         self.new_x1_mean = self.precessF2(self.new_x1)
-        self.new_x2 = self.precessL1(self.input_x2)
-        self.new_x2 = self.Mirrorgate1(self.new_x1_mean, self.new_x2)
+        self.new_x2 = self.Mirrorgate1(self.new_x1_mean, self.input_x2)
         op1, op2 = self.conv(self.new_x1, self.new_x2)
         self.match(op1, op2)
 
@@ -66,9 +65,9 @@ class CNN(object):
         with tf.name_scope("gate"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
                                                     stddev=0, seed=1), trainable=True, name='w1')
-            weight_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 2],
+            weight_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
                                                     stddev=0, seed=2), trainable=True, name='w2')
-            weight_3 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 2],
+            weight_3 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
                                                     stddev=0, seed=3), trainable=True, name='w3')
 
             # tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_1)
@@ -84,18 +83,43 @@ class CNN(object):
                              shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
             inputx_epd = tf.expand_dims(inputx, axis=2) #[b,l,1,d]
             fun1 = tf.einsum('abcd,de->abce', inputx_epd, weight_1)
-            ksw_1 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun1, k_1)))  # [batch,l,1,d]
+            ksw_1 = tf.sigmoid(tf.einsum('abcd,abdf->abcf', fun1, k_1))  # [batch,l,1,d]
 
             fun2 = tf.einsum('abcd,de->abce', inputx_epd, weight_2)
-            ksw_2 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun2, tf.concat([k_2, ksw_1], axis=2))))  # [batch,l,d]
+            ksw_2 = tf.sigmoid(tf.einsum('abcd,abdf->abcf', fun2, k_2))  # [batch,l,d]
 
             fun3 = tf.einsum('abcd,de->abce',inputx_epd , weight_3)
-            ksw_3 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun3, tf.concat([k_3, ksw_2], axis=2))))  # [batch,l,d]
+            ksw_3 = tf.sigmoid(tf.einsum('abcd,abdf->abcf', fun3, k_3))  # [batch,l,d]
 
             n_vector_ = (ksw_1 + ksw_2 + ksw_3) * inputx_epd
             n_vector = tf.reshape(n_vector_, shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
 
         return n_vector, tf.concat([ksw_1, ksw_2, ksw_3], axis=2)
+
+
+    '''
+     only use single ks
+    '''
+    def gate1_single(self, ks, inputx):
+        with tf.name_scope("gate"):
+            weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+                                                        stddev=0, seed=1), trainable=True, name='w1')
+
+
+
+            k_1_init = ks[:, 2, :]  # [None,d]
+            k_1 = tf.reshape(tf.keras.backend.repeat_elements(k_1_init, rep=self.config.FACT_LEN, axis=1),
+                                 shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
+
+            inputx_epd = tf.expand_dims(inputx, axis=2)  # [b,l,1,d]
+            fun1 = tf.einsum('abcd,de->abce', inputx_epd, weight_1)
+            ksw_1 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun1, k_1)))  # [batch,l,1,d]
+
+            n_vector_ = ksw_1 * inputx_epd
+            n_vector = tf.reshape(n_vector_, shape=[-1, self.config.FACT_LEN, self.config.EMBDDING_DIM])
+
+            return n_vector,ksw_1
+
 
         '''
         基于gate1，加上前一个词和后一个词的每个级别的概率值作为先验知识的一部分
@@ -207,7 +231,7 @@ class CNN(object):
     def precessF2(self,inputx):
         with tf.name_scope("FactPrecess"):
             inputx_ = tf.transpose(inputx,perm=[0,2,1])
-            inputx_k = tf.transpose((tf.nn.top_k(inputx_,k=5,sorted=False))[0],perm=[0,2,1]) #[None.k,d]
+            inputx_k = tf.transpose((tf.nn.top_k(inputx_,k=1,sorted=False))[0],perm=[0,2,1]) #[None.k,d]
             inputx_mean = tf.reduce_mean(inputx_k, axis=1)
             return inputx_mean
     '''
@@ -219,13 +243,13 @@ class CNN(object):
             inputy_ = tf.reshape(inputy,shape=[self.config.LAW_LEN,-1])
             new_inputy_ls = []
             for i in range(self.config.LAW_LEN-self.config.LAW_WIN):
-                inputy_slice = inputy_[i:i+self.config.LAW_LEN,:] #[law_len,b*d]
+                inputy_slice = inputy_[i:i+self.config.LAW_WIN,:] #[law_len,b*d]
                 inputy_slice_mean = tf.reduce_mean(inputy_slice, axis=0) #[1,b*d]
                 inputy_i = tf.convert_to_tensor(inputy_slice_mean)
                 new_inputy_ls.append(inputy_i)
             new_inputy_ = tf.convert_to_tensor(new_inputy_ls)
             new_inputy = tf.reshape(new_inputy_,
-                                    shape=[-1,self.config.LAW_LEN-self.config.LAW_WIN+1,self.config.EMBDDING_DIM])
+                                    shape=[-1,self.config.LAW_LEN-self.config.LAW_WIN,self.config.EMBDDING_DIM])
             return new_inputy
 
     '''
@@ -235,14 +259,14 @@ class CNN(object):
         with tf.name_scope("Fact2Law"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
                                                     stddev=0, seed=1), trainable=True, name='w1')
-            ss_epd = tf.reshape(tf.keras.backend.repeat_elements(inputx,rep=(tf.shape(inputy)[1]),axis=1),
-                                shape=[-1,(tf.shape(inputy)[1]),1,self.config.EMBDDING_DIM])  # [b,l,1,d]
+            ss_epd = tf.reshape(tf.keras.backend.repeat_elements(inputx,rep=self.config.LAW_LEN,axis=1),
+                                shape=[-1,self.config.LAW_LEN,1,self.config.EMBDDING_DIM])  # [b,l,1,d]
             law_epd = tf.expand_dims(inputy,axis=2) #[b,l,1,d]
             fun = tf.einsum('abcd,de->abce', law_epd, weight_1)
-            ksw = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abde->abce',fun, ss_epd))) #[None,l,1,d]
+            ksw = tf.sigmoid(tf.einsum('abcd,abde->abce',fun, ss_epd)) #[None,l,1,d]
 
             n_vector_ = ksw * law_epd
-            n_vector = tf.reshape(n_vector_, shape=[-1,self.config.LAW_LEN,self.config.EMBDDING_DIM])
+            n_vector = tf.reshape(n_vector_, shape=tf.shape(inputy))
         return n_vector
 
     def conv(self, inputx, inputy):

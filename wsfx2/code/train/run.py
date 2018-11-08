@@ -30,11 +30,14 @@ ks_order = '123'
 mirrorgate=  1
 precessF = '2'
 precessL = '1'
-
+topK = 5 #defalut is 5
+lastksinfo = 'Fasle' #defalut is true
+singleuse = '3'
+relu = 'False' #defalut is true
 
 save_dir  = '../../result/set4/model8'  #修改处
-save_path = save_dir+'/checkpoints/precessL'+str(precessL)+'precessF:'+str(precessF)+'MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)+'/best_validation'  # 最佳验证结果保存路径
-tensorboard_dir = save_dir+'/tensorboard/precessL'+str(precessL)+'precessF:'+str(precessF)+'MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'noaddks-30-30-'+str(n_number)+'gram/'+str(gate_n)+'-'+str(reg)  #修改处
+save_path = save_dir+'/checkpoints/singleuse:'+str(singleuse)+'-precessF:'+str(precessF)+'-MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'-noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)+'/best_validation'  # 最佳验证结果保存路径
+tensorboard_dir = save_dir+'/tensorboard/singleuse'+str(singleuse)+'-precessF:'+str(precessF)+'-MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'-noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)  #修改处
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 if not os.path.exists(tensorboard_dir):

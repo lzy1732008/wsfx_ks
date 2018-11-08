@@ -912,7 +912,7 @@ Confusion Matrix...
  [ 65 213]]
 Time usage: 0:00:15
 
-model8+gate1+precessF2+mirrotgate1+order:231(write error):
+model8+gate1+precessF2(topK=5)+mirrotgate1+order:231(write error):
 2
 precessF:2MirrorGate:1123-time:2noaddks-30-30-1gram-gate1-False
 Test Loss:   0.25, Test Acc:  78.71%
@@ -924,9 +924,74 @@ Precision, Recall and F1-Score...
 
 avg / total     0.8659    0.8677    0.8650       869
 
-model8+gate1+precessF2+mirrotgate1+order:123(write error):
+model8+gate1+precessF2((topK=5))+mirrotgate1+order:123(write error):
 3:
 precessF:2MirrorGate:1231-time:3noaddks-30-30-1gram-gate1-False
+
+
+topK comparison exp:
+model8+gate1+precessF2((topK=10))+mirrotgate1+order:123:
+topK:10precessF:2MirrorGate:1123-time:2noaddks-30-30-1gram-gate1-False
+topK:10precessF:2MirrorGate:1123-time:3noaddks-30-30-1gram-gate1-False
+
+model8+gate1+precessF2((topK=1))+mirrotgate1+order:123:
+topK:1precessF:2MirrorGate:1123-time:2noaddks-30-30-1gram-gate1-False
+
+model8+gate1+precessF2((topK=30))+mirrotgate1+order:123:
+topK:30precessF:2MirrorGate:1123-time:2noaddks-30-30-1gram-gate1-False
+
+no last level ks comparsion exp:
+lastksinfoFasleprecessF:2MirrorGate:1123-time:3noaddks-30-30-1gram-gate1-False
+
+use sigle ks comparion exp:
+only ks_1:singleuse:1-precessF:2-MirrorGate:1123-time:1-noaddks-30-30-1gram-gate1-False
+Test Loss:   0.31, Test Acc:  77.56%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8805    0.9222    0.9008       591
+          1     0.8160    0.7338    0.7727       278
+
+avg / total     0.8598    0.8619    0.8598       869
+
+Confusion Matrix...
+[[545  46]
+ [ 74 204]]
+Time usage: 0:00:19
+
+only ks_2:
+singleuse:2-precessF:2-MirrorGate:1123-time:2-noaddks-30-30-1gram-gate1-False
+Test Loss:   0.25, Test Acc:  77.68%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8671    0.9272    0.8962       591
+          1     0.8186    0.6978    0.7534       278
+
+avg / total     0.8516    0.8539    0.8505       869
+
+Confusion Matrix...
+[[548  43]
+ [ 84 194]]
+Time usage: 0:00:19
+
+only ks_3:
+singleuse:3-precessF:2-MirrorGate:1123-time:2-noaddks-30-30-1gram-gate1-False
+Test Loss:   0.28, Test Acc:  77.91%
+Precision, Recall and F1-Score...
+             precision    recall  f1-score   support
+
+          0     0.8849    0.9103    0.8974       591
+          1     0.7969    0.7482    0.7718       278
+
+avg / total     0.8567    0.8585    0.8572       869
+
+Confusion Matrix...
+[[538  53]
+ [ 70 208]]
+Time usage: 0:00:20
+
+
 
 
 
