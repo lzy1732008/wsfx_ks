@@ -46,20 +46,46 @@ import numpy as np
 # start = np.random.randn(128)
 # print(start.dtype)
 
-import tensorflow as tf
-sess = tf.InteractiveSession()
+# import tensorflow as tf
+# sess = tf.InteractiveSession()
 # a = tf.placeholder(dtype=tf.float32,name='a')
 # t = a + 1
 # feed_dict = {a:1.0}
 # print(t.eval(feed_dict=feed_dict))
 
-b = tf.constant([[0,0,0],[1,2,3],[4,5,6],[0,0,0]],name='b')
-len = tf.shape(b)[1]
-print(len)
+# b = tf.constant([[0,0,0],[1,2,3],[4,5,6],[0,0,0]],name='b')
+# len = tf.shape(b)[1]
+# print(len)
 # for _ in range(1,(b.shape)[0]-1):
 #     s.append(b[_-1] + b[_+1])
 # news = tf.convert_to_tensor(s)
 # print(sess.run(news))
+
+
+
+# import matplotlib.pyplot as plt
+# import numpy as np
+# a = np.linspace(0,4,16).reshape(4,4)
+# print(a)
+# plt.imshow(a,interpolation='nearest', cmap='bone',origin='lower')
+# plt.colorbar()
+# plt.xticks()
+# plt.yticks()
+# plt.show()
+
+
+import numpy as np
+# def discosin(v1,v2):
+#     num = np.sum(v1 * v2)
+#     denom = np.linalg.norm(v1) * np.linalg.norm(v2)
+#     cos = num/denom
+#     sim = 0.5 + 0.5 * cos
+#     return sim
+#
+# v1 = np.array([1,2,3,4])
+# v2 = np.array([2,3,4,5])
+# print(discosin(v1,v2))
+
 
 
 

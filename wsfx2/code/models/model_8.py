@@ -4,7 +4,8 @@
 
 
 import tensorflow as tf
-import numpy as np
+
+
 
 
 class modelConfig(object):
@@ -48,7 +49,7 @@ class CNN(object):
 
     def cnn(self):
         # context = self.count_context(self.input_x1)
-        self.new_x1, pwls = self.gate1_single(self.input_ks, self.input_x1)
+        self.new_x1, pwls = self.gate1(self.input_ks, self.input_x1)
         self.new_x1_mean = self.precessF2(self.new_x1)
         self.new_x2 = self.Mirrorgate1(self.new_x1_mean, self.input_x2)
         op1, op2 = self.conv(self.new_x1, self.new_x2)
@@ -65,9 +66,9 @@ class CNN(object):
         with tf.name_scope("gate"):
             weight_1 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
                                                     stddev=0, seed=1), trainable=True, name='w1')
-            weight_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+            weight_2 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 2],
                                                     stddev=0, seed=2), trainable=True, name='w2')
-            weight_3 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 1],
+            weight_3 = tf.Variable(tf.random_normal([self.config.EMBDDING_DIM, 2],
                                                     stddev=0, seed=3), trainable=True, name='w3')
 
             # tf.add_to_collection(tf.GraphKeys.WEIGHTS, weight_1)
@@ -83,13 +84,13 @@ class CNN(object):
                              shape=[-1, self.config.FACT_LEN, 1, self.config.EMBDDING_DIM])
             inputx_epd = tf.expand_dims(inputx, axis=2) #[b,l,1,d]
             fun1 = tf.einsum('abcd,de->abce', inputx_epd, weight_1)
-            ksw_1 = tf.sigmoid(tf.einsum('abcd,abdf->abcf', fun1, k_1))  # [batch,l,1,d]
+            ksw_1 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun1, k_1)))  # [batch,l,1,d]
 
             fun2 = tf.einsum('abcd,de->abce', inputx_epd, weight_2)
-            ksw_2 = tf.sigmoid(tf.einsum('abcd,abdf->abcf', fun2, k_2))  # [batch,l,d]
+            ksw_2 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun2, tf.concat([k_2,ksw_1],axis=2)) )) # [batch,l,d]
 
             fun3 = tf.einsum('abcd,de->abce',inputx_epd , weight_3)
-            ksw_3 = tf.sigmoid(tf.einsum('abcd,abdf->abcf', fun3, k_3))  # [batch,l,d]
+            ksw_3 = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abdf->abcf', fun3, tf.concat([k_3,ksw_2],axis=2)))) # [batch,l,d]
 
             n_vector_ = (ksw_1 + ksw_2 + ksw_3) * inputx_epd
             n_vector = tf.reshape(n_vector_, shape=[-1,self.config.FACT_LEN,self.config.EMBDDING_DIM])
@@ -231,7 +232,7 @@ class CNN(object):
     def precessF2(self,inputx):
         with tf.name_scope("FactPrecess"):
             inputx_ = tf.transpose(inputx,perm=[0,2,1])
-            inputx_k = tf.transpose((tf.nn.top_k(inputx_,k=1,sorted=False))[0],perm=[0,2,1]) #[None.k,d]
+            inputx_k = tf.transpose((tf.nn.top_k(inputx_,k=5,sorted=False))[0],perm=[0,2,1]) #[None.k,d]
             inputx_mean = tf.reduce_mean(inputx_k, axis=1)
             return inputx_mean
     '''
@@ -263,7 +264,7 @@ class CNN(object):
                                 shape=[-1,self.config.LAW_LEN,1,self.config.EMBDDING_DIM])  # [b,l,1,d]
             law_epd = tf.expand_dims(inputy,axis=2) #[b,l,1,d]
             fun = tf.einsum('abcd,de->abce', law_epd, weight_1)
-            ksw = tf.sigmoid(tf.einsum('abcd,abde->abce',fun, ss_epd)) #[None,l,1,d]
+            ksw = tf.sigmoid(tf.nn.relu(tf.einsum('abcd,abde->abce',fun, ss_epd))) #[None,l,1,d]
 
             n_vector_ = ksw * law_epd
             n_vector = tf.reshape(n_vector_, shape=tf.shape(inputy))

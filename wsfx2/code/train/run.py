@@ -10,6 +10,7 @@ import numpy as np
 import tensorflow as tf
 from sklearn import metrics
 import tensorflow.contrib.keras as kr
+import matplotlib.pyplot as plt
 
 from wsfx2.code.models.model_8 import modelConfig,CNN
 from wsfx2.code.train.loader import batch_iter,data_load,data_ngram,addStart
@@ -23,7 +24,7 @@ v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
 ks_flag = 3 #kw level
 n_number = 1 #n-gram
-gate_n = 1
+gate_n = 3
 reg = False #defalut is false
 times =1
 ks_order = '123'
@@ -36,8 +37,13 @@ singleuse = '3'
 relu = 'False' #defalut is true
 
 save_dir  = '../../result/set4/model8'  #修改处
-save_path = save_dir+'/checkpoints/singleuse:'+str(singleuse)+'-precessF:'+str(precessF)+'-MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'-noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)+'/best_validation'  # 最佳验证结果保存路径
-tensorboard_dir = save_dir+'/tensorboard/singleuse'+str(singleuse)+'-precessF:'+str(precessF)+'-MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'-noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)  #修改处
+# save_path = save_dir+'/checkpoints/precessF:'+str(precessF)+'-MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)+'/best_validation'  # 最佳验证结果保存路径
+# tensorboard_dir = save_dir+'/tensorboard/precessF:'+str(precessF)+'-MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)  #修改处
+ckpath = 'precessF:2MirrorGate:1231-time:3noaddks-30-30-1gram-gate1-False'
+tbpath = 'precessF:2MirrorGate:1231-time:3noaddks-30-30-1gram-gate1-False'
+save_path = save_dir+'/checkpoints/'+ckpath+'/best_validation'
+tensorboard_dir = save_dir + '/tensorboard/' + tbpath
+
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 if not os.path.exists(tensorboard_dir):
@@ -212,6 +218,7 @@ def test():
 
     y_test_cls = np.argmax(y_test, 1)
     y_pred_cls = np.zeros(shape=len(x1_test), dtype=np.int32)  # 保存预测结果
+
     for i in range(num_batch):  # 逐批次处理
         start_id = i * batch_size
         end_id = min((i + 1) * batch_size, data_len)
@@ -221,7 +228,9 @@ def test():
             model.input_ks: ks_test[start_id:end_id],
             model.keep_prob: 1.0   #这个表示测试时不使用dropout对神经元过滤
         }
-        y_pred_cls[start_id:end_id] = session.run(model.y_pred_cls, feed_dict=feed_dict)   #将所有批次的预测结果都存放在y_pred_cls中
+        y_pred_cls[start_id:end_id]= session.run(model.y_pred_cls, feed_dict=feed_dict)   #将所有批次的预测结果都存放在y_pred_cls中
+
+
 
 
 

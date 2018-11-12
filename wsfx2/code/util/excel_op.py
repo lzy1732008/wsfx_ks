@@ -41,7 +41,7 @@ def createx(wsname, rows, colums, data ,dir):
     for i in range(len(data)):
         for j in range(len(data[i])):
             ws.write(i+1,j+1,data[i][j])
-    wb.save(dir+'/'+wsname+'_20180705.xls');
+    wb.save(dir+'/'+wsname+'_20181110.xls');
 
 
 

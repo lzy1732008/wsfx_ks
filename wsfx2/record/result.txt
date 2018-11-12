@@ -924,6 +924,9 @@ Precision, Recall and F1-Score...
 
 avg / total     0.8659    0.8677    0.8650       869
 
+
+
+best:*****************
 model8+gate1+precessF2((topK=5))+mirrotgate1+order:123(write error):
 3:
 precessF:2MirrorGate:1231-time:3noaddks-30-30-1gram-gate1-False

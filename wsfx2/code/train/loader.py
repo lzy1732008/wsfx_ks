@@ -65,6 +65,15 @@ def batch_iter2(x1, x2,  y, batch_size=128):
         end_id = min((i + 1) * batch_size, data_len)
         yield x1_shuffle[start_id:end_id],x2_shuffle[start_id:end_id],  y_shuffle[start_id:end_id]
 
+def batch_iter2_test(x1, x2, y, batch_size=128):
+    """生成批次数据"""
+    data_len = len(x1)
+    num_batch = int(data_len / batch_size)
+    for i in range(num_batch):
+        start_id = i * batch_size
+        end_id = min((i + 1) * batch_size, data_len)
+        yield x1[start_id:end_id], x2[start_id:end_id], y[start_id:end_id]
+
 
 #3 inputs
 def data_load(data_f, config, flag=3):
@@ -94,8 +103,8 @@ def data_load(data_f, config, flag=3):
         input_ks.append(zs_matrix)
 
 
-    train_1 = kr.preprocessing.sequence.pad_sequences(np.array(input_x1), config.FACT_LEN)
-    train_2 = kr.preprocessing.sequence.pad_sequences(np.array(input_x2), config.LAW_LEN)
+    train_1 = kr.preprocessing.sequence.pad_sequences(np.array(input_x1), config.seq_length_1)
+    train_2 = kr.preprocessing.sequence.pad_sequences(np.array(input_x2), config.seq_length_2)
     train_ks = np.array(input_ks)
 
     return train_1,train_2,train_ks,np.array(input_y)
@@ -196,6 +205,20 @@ def batch_iter5(x1_len, x1, x2_len, x2,  y,  batch_size=128):
         end_id = min((i + 1) * batch_size, data_len)
         yield x1_len_shuffle[start_id:end_id],x1_shuffle[start_id:end_id],x2_len_shuffle[start_id:end_id], x2_shuffle[start_id:end_id],  y_shuffle[start_id:end_id]
 
+#used with data_load5
+def batch_iter5_test(x1_len, x1, x2_len, x2,  y,  batch_size=128):
+    """生成批次数据"""
+    data_len = len(x1)
+    num_batch = int(data_len / batch_size)
+
+
+    for i in range(num_batch):
+        start_id = i * batch_size
+        end_id = min((i + 1) * batch_size, data_len)
+        yield x1_len[start_id:end_id],x1[start_id:end_id],x2_len[start_id:end_id], x2[start_id:end_id],  y[start_id:end_id]
+
+
+
 
 def embedding_load(words_f):
     cpslist = words_f.read().split('\n')
@@ -238,3 +261,14 @@ def batch_iter(x1, x2, ks, y, batch_size=128):
         start_id = i * batch_size
         end_id = min((i + 1) * batch_size, data_len)
         yield x1_shuffle[start_id:end_id],x2_shuffle[start_id:end_id], ks_shuffle[start_id:end_id], y_shuffle[start_id:end_id]
+
+
+def batch_iter_test(x1,x2,ks,y,batch_size=128):
+    data_len = len(x1)
+    num_batch = int(data_len / batch_size)
+
+    for i in range(num_batch):
+        start_id = i * batch_size
+        end_id = min((i + 1) * batch_size, data_len)
+        yield x1[start_id:end_id], x2[start_id:end_id], ks[start_id:end_id], y[start_id:end_id]
+

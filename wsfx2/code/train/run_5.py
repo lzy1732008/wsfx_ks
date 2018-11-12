@@ -12,7 +12,8 @@ from sklearn import metrics
 import tensorflow.contrib.keras as kr
 
 from wsfx2.code.models.matchpy1 import modelconfig,MatchPy
-from wsfx2.code.train.loader import batch_iter5,data_load5,embedding_load
+from wsfx2.code.train.loader import batch_iter5_test,data_load5,embedding_load
+from wsfx2.code.train.evaluate import getwslist,wsevaluate
 
 data_dir = '../../source/dataset/set_5'
 trainpath = data_dir+'/train.txt'
@@ -27,9 +28,18 @@ corpuspath = '../../source/wordvector/words.txt'
 words_f = open(corpuspath,'r',encoding='utf-8')
 embedding = embedding_load(words_f)
 
+# save_dir  = '../../result/set5/matchpy1'  #修改处
+# save_path = save_dir+'/checkpoints/30-50/best_validation'  # 最佳验证结果保存路径
+# tensorboard_dir = save_dir+'/tensorboard/30-50/'  #修改处
+
+
 save_dir  = '../../result/set5/matchpy1'  #修改处
-save_path = save_dir+'/checkpoints/30-50/best_validation'  # 最佳验证结果保存路径
-tensorboard_dir = save_dir+'/tensorboard/30-50/'  #修改处
+ckpath = '30-50'
+tbpath = '30-50'
+save_path = save_dir+'/checkpoints/'+ckpath+'/best_validation'
+tensorboard_dir = save_dir + '/tensorboard/' + tbpath
+
+
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 if not os.path.exists(tensorboard_dir):
@@ -64,7 +74,7 @@ def feed_data(x1_len,x1_batch,x2_len,x2_batch,y_batch,  keep_prob):
 def evaluate(sess, x1_len, x1_,x2_len, x2_,y_):
     """评估在某一数据上的准确率和损失"""
     data_len = len(x1_)
-    batch_eval = batch_iter5(x1_len, x1_, x2_len, x2_,y_, 128)
+    batch_eval = batch_iter5_test(x1_len, x1_, x2_len, x2_,y_, 128)
     total_loss = 0.0
     total_acc = 0.0
     for x1_len_batch, x1_batch,x2_len_batch, x2_batch, y_batch in batch_eval:
@@ -221,4 +231,6 @@ def test():
     return y_test_cls,y_pred_cls
 
 # train()
-test()
+y_test_cls,y_pred_cls = test()
+wsnamels = getwslist(model=model)
+wsevaluate(y_test_cls, y_pred_cls,wsnamels)
