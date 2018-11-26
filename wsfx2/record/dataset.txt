@@ -2,6 +2,7 @@ set1:different word2vec + train and val same distribution
 set2:same word2vec + train and val same distribution
 set3:same word2vec + train and val different distribution
 set4:same word2vec + train and val same distribution + 3levels
+set5:nofilter 0 in train and val
 train\validation\test dataset use same splited ws in valset\train
 
 

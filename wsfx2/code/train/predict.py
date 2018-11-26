@@ -1,5 +1,5 @@
 # coding: utf-8
-
+#analyze the function of gate
 from __future__ import print_function
 
 import os

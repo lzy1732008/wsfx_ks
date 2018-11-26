@@ -252,11 +252,11 @@ def zsVector(zwls, word_m,flag=1):
 '''
 训练数据
 '''
-# data_f= open('../../source/dataset/test/test-fc.txt','r',encoding='utf-8')
-# tartget_f = open('../../source/dataset/test/test.txt','w',encoding='utf-8')
-# model_ss = load_models('../../source/wordvector/ssmodel_size128.model')
-# model_ft = load_models('../../source/wordvector/ssmodel_size128.model')
-# fun4(data_f,tartget_f,model_ss,model_ft)
+data_f= open('../../source/dataset/set_1/test-分词.txt','r',encoding='utf-8')
+tartget_f = open('../../source/dataset/set-lyw2/test.txt','w',encoding='utf-8')
+model_ss = load_models('../../source/wordvector/ssmodel_size128.model')
+model_ft = load_models('../../source/wordvector/lawmodel_size128.model')
+fun4(data_f,tartget_f,model_ss,model_ft)
 
 '''
 测试数据

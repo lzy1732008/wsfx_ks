@@ -15,6 +15,16 @@ def countlines(filepath):
     lines = f.read().split('\n')
     print(len(lines))
 
+data_dir = '../../source/dataset/set-lyw'
+trainpath = data_dir+'/trainlyw.txt'
+t_f = open(trainpath,'r',encoding='utf-8')
+lines = t_f.read().split('\n')
+facts = lines[9].split('|')[1]
+fs = facts.split(' ')
+vect = fs[0].split('//')
+vs = list(filter(lambda x: str(x).strip() != '', vect))
+print(len(vs))
+
 
 
 

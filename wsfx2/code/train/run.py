@@ -12,16 +12,21 @@ from sklearn import metrics
 import tensorflow.contrib.keras as kr
 import matplotlib.pyplot as plt
 
-from wsfx2.code.models.model_8 import modelConfig,CNN
-from wsfx2.code.train.loader import batch_iter,data_load,data_ngram,addStart
+from wsfx2.code.models.ce_nomirror import modelConfig,CNN
+from wsfx2.code.train.loader import batch_iter,batch_iter_test,data_load
 
 data_dir = '../../source/dataset/set_4'
 trainpath = data_dir+'/train.txt'
 validatepath = data_dir+'/val.txt'
 testpath = data_dir +'/test.txt'
+testpath_fc = '../../source/dataset/set_1/test-分词.txt'
+# testpath = '/home/gjd/PycharmProjects/wsfx_ks/wsfx2/source/dataset/set-lyw2/test.txt'
 t_f = open(trainpath,'r',encoding='utf-8')
 v_f = open(validatepath,'r',encoding='utf-8')
 test_f = open(testpath,'r',encoding='utf-8')
+test_fc_f = open(testpath,'r',encoding='utf-8')
+
+
 ks_flag = 3 #kw level
 n_number = 1 #n-gram
 gate_n = 3
@@ -36,11 +41,11 @@ lastksinfo = 'Fasle' #defalut is true
 singleuse = '3'
 relu = 'False' #defalut is true
 
-save_dir  = '../../result/set4/model8'  #修改处
+save_dir  = '../../result/set4/ce_nomirror'  #修改处
 # save_path = save_dir+'/checkpoints/precessF:'+str(precessF)+'-MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)+'/best_validation'  # 最佳验证结果保存路径
 # tensorboard_dir = save_dir+'/tensorboard/precessF:'+str(precessF)+'-MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)  #修改处
-ckpath = 'precessF:2MirrorGate:1231-time:3noaddks-30-30-1gram-gate1-False'
-tbpath = 'precessF:2MirrorGate:1231-time:3noaddks-30-30-1gram-gate1-False'
+ckpath = 'times:1'
+tbpath = 'times:1'
 save_path = save_dir+'/checkpoints/'+ckpath+'/best_validation'
 tensorboard_dir = save_dir + '/tensorboard/' + tbpath
 
@@ -53,6 +58,67 @@ if not os.path.exists(tensorboard_dir):
 config = modelConfig()
 model = CNN(config)
 
+def wsevaluate(y_pred_cls,y_test_cls,wslist):
+    print('y_pred_cls.len:',len(y_pred_cls))
+    print('y_test_cls.len',len(y_test_cls))
+    print('wslist.len:',len(wslist))
+    pred_true = {}
+    positive = {}
+    pred_pos = {}
+    for i in range(len(y_test_cls)):
+        if pred_pos.get(wslist[i].strip()) == None:
+            pred_pos[wslist[i].strip()] = 0
+        if pred_true.get(wslist[i].strip()) == None:
+            pred_true[wslist[i].strip()] = 0
+        if positive.get(wslist[i].strip()) == None:
+            positive[wslist[i].strip()] = 0
+
+        if y_pred_cls[i] == 1:
+            pred_pos[wslist[i]] += 1
+        if y_test_cls[i] == 1:
+            positive[wslist[i]] += 1
+        if y_test_cls[i] == y_pred_cls[i] and y_pred_cls[i] == 1:
+            pred_true[wslist[i]] += 1
+
+    F1_ls = []
+    wslist = list(set(wslist))
+    for wsname in wslist:
+        # print(pred_pos[wsname.strip()],positive[wsname.strip()],pred_true[wsname.strip()])
+        if positive[wsname.strip()] == 0:
+            print('Failed')
+            continue
+        else:
+            recall = pred_true[wsname.strip()] / (positive[wsname.strip()])
+            if pred_pos[wsname.strip()] == 0:
+               preciosn = 0
+            else:
+               precision = pred_true[wsname.strip()]/(pred_pos[wsname.strip()])
+            if recall + precision == 0:
+                F1 = 0
+            else:
+                F1 = (2*recall*precision)/(precision+recall)
+            F1_ls.append(F1)
+            # print('F1:',F1)
+    print('F1:',np.mean(np.array(F1_ls)))
+
+def getwslist(model):
+    namels = []
+    lines = test_fc_f.read().split('\n')
+    # print(lines)
+    print(model.config.batch_size)
+    max_idx = int(len(lines) / model.config.batch_size) * model.config.batch_size
+    print('max_idx:',max_idx)
+    for i in range(len(lines)):
+        line = lines[i]
+        if line.strip() == "":
+            continue
+        array = line.split('|')
+
+        if len(array) < 5:
+            continue
+
+        namels.append(array[0])
+    return namels
 
 
 
@@ -89,6 +155,21 @@ def evaluate(sess, x1_,x2_,ks_,y_):
 
     return total_loss / data_len, total_acc / data_len
 
+
+def evaluate_test(sess, x1_,x2_,ks_,y_):
+    """评估在某一数据上的准确率和损失"""
+    data_len = len(x1_)
+    batch_eval = batch_iter_test(x1_, x2_,ks_,y_, 128)
+    total_loss = 0.0
+    total_acc = 0.0
+    for x1_batch,x2_batch, ks_batch, y_batch in batch_eval:
+        batch_len = len(x1_batch)
+        feed_dict = feed_data(x1_batch,x2_batch,ks_batch, y_batch, 1.0)
+        loss, acc = sess.run([model.loss, model.acc], feed_dict=feed_dict)
+        total_loss += loss * batch_len
+        total_acc += acc * batch_len
+
+    return total_loss / data_len, total_acc / data_len
 
 def train():
     print("Configuring TensorBoard and Saver...")
@@ -208,7 +289,7 @@ def test():
     saver.restore(sess=session, save_path=save_path)  # 读取保存的模型
 
     print('Testing...')
-    loss_test, acc_test = evaluate(session, x1_test,x2_test, ks_test, y_test)
+    loss_test, acc_test = evaluate_test(session, x1_test,x2_test, ks_test, y_test)
     msg = 'Test Loss: {0:>6.2}, Test Acc: {1:>7.2%}'
     print(msg.format(loss_test, acc_test))
 
@@ -231,9 +312,6 @@ def test():
         y_pred_cls[start_id:end_id]= session.run(model.y_pred_cls, feed_dict=feed_dict)   #将所有批次的预测结果都存放在y_pred_cls中
 
 
-
-
-
     print("Precision, Recall and F1-Score...")
     print(metrics.classification_report(y_test_cls, y_pred_cls,digits=4))#直接计算准确率，召回率和f值
 
@@ -247,6 +325,9 @@ def test():
     return y_test_cls,y_pred_cls
 
 # train()
-test()
+
+y_test_cls, y_pred_cls= test()
+wsnamels = getwslist(model)
+wsevaluate(y_test_cls, y_pred_cls,wsnamels)
 
 

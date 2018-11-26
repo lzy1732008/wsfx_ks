@@ -7,8 +7,8 @@ class modelConfig(object):
     def __init__(self):
         self.EMBDDING_DIM = 128
         self.FACT_LEN = 30
-        self.LAW_LEN = 50
-        self.KS_LEN= 5
+        self.LAW_LEN = 30
+        self.KS_LEN= 1
 
         self.FILTERS = 256
         self.KERNEL_SIZE = 5  # 卷积核尺寸
