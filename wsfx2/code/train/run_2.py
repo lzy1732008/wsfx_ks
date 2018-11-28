@@ -11,7 +11,7 @@ import tensorflow as tf
 from sklearn import metrics
 import tensorflow.contrib.keras as kr
 
-from wsfx2.code.models.cnn_model import TCNNConfig,TextCNN
+from wsfx2.code.models.ARC_2 import modelConfig,ARC2model
 from wsfx2.code.train.loader import batch_iter2_test,data_load2,batch_iter2
 
 data_dir = '../../source/dataset/set_1'
@@ -45,8 +45,8 @@ if not os.path.exists(tensorboard_dir):
     os.makedirs(tensorboard_dir)
 
 
-config = TCNNConfig()
-model = TextCNN(config)
+config = modelConfig()
+model = ARC2model(config)
 
 
 
@@ -298,7 +298,8 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-# train()
-y_test_cls,y_pred_cls = test()
-wsnamels = getwslist(model=model)
-wsevaluate(y_test_cls, y_pred_cls,wsnamels)
+train()
+
+# y_test_cls,y_pred_cls = test()
+# wsnamels = getwslist(model=model)
+# wsevaluate(y_test_cls, y_pred_cls,wsnamels)
