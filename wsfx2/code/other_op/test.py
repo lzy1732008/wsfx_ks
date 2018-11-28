@@ -53,6 +53,7 @@ import numpy as np
 # feed_dict = {a:1.0}
 # print(t.eval(feed_dict=feed_dict))
 
+# a = tf.constant([[0,0,0],[1,2,3],[4,5,6],[0,0,0]],name='b')
 # b = tf.constant([[0,0,0],[1,2,3],[4,5,6],[0,0,0]],name='b')
 # len = tf.shape(b)[1]
 # print(len)
@@ -86,6 +87,12 @@ import numpy as np
 # v2 = np.array([2,3,4,5])
 # print(discosin(v1,v2))
 
+# a = tf.constant([[0,0,0],[1,2,3],[4,5,6],[0,0,0]],name='b') #[4,3]
+# b = tf.constant([[0,0,0],[1,2,3],[4,5,6],[0,0,0]],name='b') #[4,3]
+# concat = tf.concat([a,b],axis=-1)
+# with tf.Session() as sess:
+#     print(sess.run(concat)) #[4,6]
+#     print(concat.shape)
 
 
 

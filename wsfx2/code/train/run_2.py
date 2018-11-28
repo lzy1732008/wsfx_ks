@@ -11,7 +11,7 @@ import tensorflow as tf
 from sklearn import metrics
 import tensorflow.contrib.keras as kr
 
-from wsfx2.code.models.ARC_2 import modelConfig,ARC2model
+from wsfx2.code.models.mlp import mlpConfig,mlpmodel
 from wsfx2.code.train.loader import batch_iter2_test,data_load2,batch_iter2
 
 data_dir = '../../source/dataset/set_1'
@@ -31,9 +31,9 @@ times = 3
 # tensorboard_dir = save_dir+'/tensorboard/times'+str(times)+'30-30-k=5-output=16/'  #修改处
 
 
-save_dir  = '../../result/set1/arc2'  #修改处
-ckpath = '30-30'
-tbpath = '30-30'
+save_dir  = '../../result/set1/mlp'  #修改处
+ckpath = '30-30-1'
+tbpath = '30-30-1'
 save_path = save_dir+'/checkpoints/'+ckpath+'/best_validation'
 tensorboard_dir = save_dir + '/tensorboard/' + tbpath
 
@@ -45,8 +45,8 @@ if not os.path.exists(tensorboard_dir):
     os.makedirs(tensorboard_dir)
 
 
-config = modelConfig()
-model = ARC2model(config)
+config = mlpConfig()
+model = mlpmodel(config)
 
 
 
