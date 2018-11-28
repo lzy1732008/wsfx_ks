@@ -3,8 +3,8 @@ import tensorflow as tf
 class modelConfig(object):
     def __init__(self):
         self.EMBDDING_DIM = 128
-        self.FACT_LEN = 30
-        self.LAW_LEN = 30
+        self.seq_length_1 = 30
+        self.seq_length_2 = 30
 
         self.FILTERS = 30
         self.KERNEL_SIZE = 3  # 卷积核尺寸
@@ -28,9 +28,9 @@ class modelConfig(object):
 class ARC2model(object):
     def __init__(self, config):
         self.config = config
-        self.input_x1 = tf.placeholder(tf.float32, [None, self.config.FACT_LEN , self.config.EMBDDING_DIM],
+        self.input_x_1 = tf.placeholder(tf.float32, [None, self.config.seq_length_1 , self.config.EMBDDING_DIM],
                                        name='input_x1')
-        self.input_x2 = tf.placeholder(tf.float32, [None, self.config.LAW_LEN , self.config.EMBDDING_DIM],
+        self.input_x_2 = tf.placeholder(tf.float32, [None, self.config.seq_length_2 , self.config.EMBDDING_DIM],
                                        name='input_x2')
         self.input_y = tf.placeholder(tf.int32, [None, self.config.NUM_CLASS],
                                       name='input_y')
@@ -40,7 +40,7 @@ class ARC2model(object):
         return
 
     def cnn(self):
-        concat = tf.concat([self.input_x1,self.input_x2],axis=-1)
+        concat = tf.concat([self.input_x_1,self.input_x_2],axis=-1)
         with tf.name_scope("layer1"):
             layer1_input=tf.layers.conv1d(concat, filters=self.config.FILTERS, kernel_size=self.config.KERNEL_SIZE,
                              name='conv1',activation=tf.nn.relu,padding='SAME')

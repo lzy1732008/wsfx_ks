@@ -298,8 +298,8 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-train()
-
-# y_test_cls,y_pred_cls = test()
-# wsnamels = getwslist(model=model)
-# wsevaluate(y_test_cls, y_pred_cls,wsnamels)
+# train()
+#
+y_test_cls,y_pred_cls = test()
+wsnamels = getwslist(model=model)
+wsevaluate(y_test_cls, y_pred_cls,wsnamels)
