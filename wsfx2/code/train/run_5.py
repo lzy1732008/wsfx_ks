@@ -1,5 +1,5 @@
 # coding: utf-8
-
+#包含5个输入关键参数：inputx,inputx_len,inputy,inputy_len,y
 from __future__ import print_function
 
 import os
