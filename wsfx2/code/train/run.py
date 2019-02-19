@@ -44,8 +44,8 @@ relu = 'False' #defalut is true
 save_dir  = '../../result/set4/ce_initgate'  #修改处
 # save_path = save_dir+'/checkpoints/precessF:'+str(precessF)+'-MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)+'/best_validation'  # 最佳验证结果保存路径
 # tensorboard_dir = save_dir+'/tensorboard/precessF:'+str(precessF)+'-MirrorGate:'+str(mirrorgate)+ks_order+'-time:'+str(times)+'noaddks-30-30-'+str(n_number)+'gram-gate'+str(gate_n)+'-'+str(reg)  #修改处
-ckpath = 'times:1'
-tbpath = 'times:1'
+ckpath = 'times:2'
+tbpath = 'times:2'
 save_path = save_dir+'/checkpoints/'+ckpath+'/best_validation'
 tensorboard_dir = save_dir + '/tensorboard/' + tbpath
 
@@ -324,10 +324,10 @@ def test():
     print("Time usage:", time_dif)
     return y_test_cls,y_pred_cls
 
-train()
+#train()
 
-# y_test_cls, y_pred_cls= test()
-# wsnamels = getwslist(model)
-# wsevaluate(y_test_cls, y_pred_cls,wsnamels)
+y_test_cls, y_pred_cls= test()
+wsnamels = getwslist(model)
+wsevaluate(y_test_cls, y_pred_cls,wsnamels)
 
 

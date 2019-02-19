@@ -46,7 +46,7 @@ class CNN(object):
 
     def cnn(self):
         self.new_ks = tf.reduce_mean(self.input_ks,axis=1,keep_dims=True)
-        self.new_x1, pwls = self.gate(self.new_ks, self.input_x1)
+        self.new_x1 = self.gate(self.new_ks, self.input_x1)
         self.new_x1_mean = self.precessF2(self.new_x1)
         self.new_x1_mean_expd = tf.expand_dims(self.new_x1_mean,axis=1)
         self.new_x2 = self.gate(self.new_x1_mean_expd, self.input_x2)
@@ -66,14 +66,18 @@ class CNN(object):
                                                     stddev=0, seed=1),trainable=True, name='w2')
 
             temp1 = tf.einsum('abc,ce->abe',inputx,weight_1) #[b,l,d]
+
+            newks = tf.keras.backend.repeat_elements(ks,rep=inputx.shape[1],axis=1)
             temp2 = tf.keras.backend.repeat_elements(tf.einsum('abc,ce->abe',ks,weight_2),rep=inputx.shape[1],axis=1) #[b,l,d]
 
 
             pw = tf.sigmoid(temp1+temp2)
 
-            one_array = tf.ones(shape=pw.shape)
+            one_array = tf.ones(shape=tf.shape(pw))
 
-            new_vector = (one_array - pw) * inputx + pw * ks
+
+
+            new_vector = (one_array - pw) * inputx + pw * newks
         return new_vector
 
 
